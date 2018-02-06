@@ -79,7 +79,7 @@ class Game extends Component {
     }
 
     componentDidUpdate() {
-        console.log('update m');
+        console.log('update aaa');
         window.cancelAnimationFrame(this.requestframeref);
 
         const gp = this.gameParams;
