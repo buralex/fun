@@ -1,0 +1,73 @@
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box; }
+
+body {
+  padding: 10px; }
+
+#field {
+  width: 500px;
+  height: 500px;
+  outline: 1px solid red;
+  font-size: 0;
+  position: relative; }
+
+.brick,
+.cell,
+.removed {
+  width: 10px;
+  height: 10px;
+  display: inline-block;
+  border: 1px solid black; }
+
+.brick.removed,
+.cell {
+  background-color: #010a1e; }
+
+#paddle {
+  width: 62px;
+  height: 10px;
+  border: 1px solid #777;
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #cdd), color-stop(100%, #777));
+  background: -webkit-linear-gradient(top, #cdd 0%, #777 100%);
+  background: linear-gradient(to bottom, #cdd 0%, #777 100%);
+  position: absolute;
+  left: 128px;
+  top: 470px;
+  border-radius: 3px; }
+
+#ball {
+  width: 10px;
+  height: 10px;
+  border: 1px solid #955;
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #fdd), color-stop(100%, #500));
+  background: -webkit-linear-gradient(top, #fdd 0%, #500 100%);
+  background: linear-gradient(to bottom, #fdd 0%, #500 100%);
+  border-radius: 50%;
+  position: absolute; }
+
+#lifesNode,
+#scoreNode {
+  position: absolute;
+  right: -85px;
+  font: 14px arial, helvetica, sans-serif;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 1px 0;
+  width: 75px;
+  text-align: center; }
+
+#lifesNode {
+  top: 20px; }
+
+#lifesNode:before {
+  content: 'lifes: '; }
+
+#scoreNode {
+  top: 50px; }
+
+#scoreNode:before {
+  content: 'score: '; }
+
+/*# sourceMappingURL=style.css.map */
