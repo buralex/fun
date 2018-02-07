@@ -16,10 +16,11 @@ class Game extends Component {
             // // offset ball per cycle (px)
             // dx: -2,
             // dy: -2,
-            width: 500,
-            height: 500,
+            width: 700,
+            height: 700,
             lives: 100,
             score: 0,
+            paddingBottom: 30,
 
             // initial positioning
             ball: {
@@ -70,12 +71,10 @@ class Game extends Component {
 
         this.initParams(gp);
 
+        this.handlePaddleMovement(gp);
+
         this.draw(gp);
 
-        document.addEventListener('mousemove', (e) => {
-            gp.paddle.x = (e.pageX > 40) ? ((e.pageX < 480) ? e.pageX - 40 : 439) : 0;
-            gp.paddleNode.style.left = gp.paddle.x + 'px';
-        }, false);
     }
 
     componentDidUpdate() {
@@ -89,16 +88,57 @@ class Game extends Component {
         this.draw(gp);
     }
 
-    initParams = ({width, height, paddle, ball}) => {
+    handlePaddleMovement = ({paddle, paddleNode, width, }) => {
+        document.addEventListener('mousemove', (e) => {
+
+            //  Keep the paddle in bounds
+            // if (paddle.x < 0 + (paddle.width / 2)) {
+            //     paddle.x = 0 + (paddle.width / 2);
+            // }
+            // if (this.paddle.x > game.gameBounds.right - (this.paddle.width / 2)) {
+            //     this.paddle.x = game.gameBounds.right - (this.paddle.width / 2);
+            // }
+
+            console.log(e.pageX);
+            console.log(window.innerWidth);
+
+            paddle.x = e.pageX;
+
+            // // Keep the paddle in bounds
+            // if (e.pageX < 0 + (paddle.width / 2)) {
+            //     paddle.x = 0 + (paddle.width / 2);
+            // }
+            // if (this.paddle.x > game.gameBounds.right - (this.paddle.width / 2)) {
+            //     this.paddle.x = game.gameBounds.right - (this.paddle.width / 2);
+            // }
+
+            // paddle.x = (e.pageX > 40) ? ((e.pageX < 480) ? e.pageX - 40 : 439) : 0;
+            paddleNode.style.left = `${paddle.x}px`;
+        }, false);
+    }
+
+    initParams = ({width, height, paddle, ball, paddingBottom, paddleNode}) => {
 
         paddle.x = width / 2;
-        paddle.y = height - paddle.height;
+        paddle.y = height - paddle.height - paddingBottom;
 
         ball.x = paddle.x;
         ball.y = paddle.y - paddle.height / 2;
+
+        console.log(paddleNode);
+        console.log(paddleNode);
+
+        paddleNode.style.top = `${paddle.y}px`;
+
+        // this.gameBounds = {
+        //     left: width / 2 - this.config.gameWidth / 2,
+        //     right: width / 2 + this.config.gameWidth / 2,
+        //     top: height / 2 - this.config.gameHeight / 2,
+        //     bottom: height / 2 + this.config.gameHeight / 2,
+        // }
     }
 
-    draw = ({ dx, dy, px, brickNodes, ball, paddle, lives, ballNode,}) => {
+    draw = ({ dx, dy, px, brickNodes, ball, ballNode, paddle, paddleNode, lives, }) => {
 
         let _this = this;
 
@@ -112,6 +152,7 @@ class Game extends Component {
         * -------------------------------------------------------------------*/
 
             ballNode.style.left = `${ball.x}px`;
+            ballNode.style.top = `${ball.y}px`;
             console.log(ballNode.style);
             console.log(ballNode.style);
 
@@ -250,8 +291,8 @@ class Game extends Component {
                 <div ref={(livesNode) => {this.gameParams.livesNode = livesNode}} id="livesNode">3</div>
                 <div ref={(scoreNode) => {this.gameParams.scoreNode = scoreNode}} id="scoreNode">0</div>
 
-                <button onClick={this.increaseSpeed}>increase</button>
-                <button onClick={this.decreaseSpeed}>decrease</button>
+                {/*<button onClick={this.increaseSpeed}>increase</button>*/}
+                {/*<button onClick={this.decreaseSpeed}>decrease</button>*/}
             </div>
         );
     }
