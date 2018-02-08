@@ -21,6 +21,7 @@ class Game extends Component {
             lives: 100,
             score: 0,
             paddingBottom: 30,
+            dt: 1 / 50, // 50fps
 
             // initial positioning
             ball: {
@@ -31,6 +32,7 @@ class Game extends Component {
                 theta: (-1 * Math.PI) / 2,
                 last_x: 0,
                 last_y: 0,
+                speed: 500,
             },
             paddle: {
                 x:0,
@@ -38,7 +40,7 @@ class Game extends Component {
                 width: 60,
                 height: 16,
                 last_x: 0,
-                speed: 500,
+                speed: 300,
             },
 
             // elements (DOM nodes)
@@ -99,10 +101,10 @@ class Game extends Component {
             //     this.paddle.x = game.gameBounds.right - (this.paddle.width / 2);
             // }
 
-            console.log(e.pageX);
-            console.log(window.innerWidth);
+            //console.log(e.pageX);
+            //console.log(window.innerWidth);
 
-            paddle.x = e.pageX;
+            //paddle.x = e.pageX;
 
             // // Keep the paddle in bounds
             // if (e.pageX < 0 + (paddle.width / 2)) {
@@ -138,7 +140,7 @@ class Game extends Component {
         // }
     }
 
-    draw = ({ dx, dy, px, brickNodes, ball, ballNode, paddle, paddleNode, lives, }) => {
+    draw = ({ dx, dy, px, brickNodes, ball, ballNode, paddle, paddleNode, lives, dt }) => {
 
         let _this = this;
 
@@ -150,6 +152,13 @@ class Game extends Component {
         /*---------------------------------------------------------------------
                 ball movement
         * -------------------------------------------------------------------*/
+            console.log('tic ', ball.x);
+
+            // Move the ball
+            ball.last_x = ball.x;
+            ball.last_y = ball.y;
+            ball.x += dt * ball.speed * Math.cos(ball.theta);
+            ball.y += dt * ball.speed * Math.sin(ball.theta);
 
             ballNode.style.left = `${ball.x}px`;
             ballNode.style.top = `${ball.y}px`;
@@ -158,7 +167,7 @@ class Game extends Component {
 
             //debugger
 
-            //_this.requestframeref = window.requestAnimationFrame(step);
+            _this.requestframeref = window.requestAnimationFrame(step);
 
         /*---------------------------------------------------------------------
                 end ball movement
