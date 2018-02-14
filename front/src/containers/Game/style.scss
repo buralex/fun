@@ -43,8 +43,6 @@ body {
 }
 
 #paddle {
-  width: 62px;
-  height: 10px;
   border: 1px solid #777;
   background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #cdd), color-stop(100%, #777));
   background: -webkit-linear-gradient(top,  #cdd 0%, #777 100%);
@@ -56,8 +54,6 @@ body {
 }
 
 #ball {
-  width: 10px;
-  height: 10px;
   border: 1px solid #955;
   background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #fdd), color-stop(100%, #500));
   background: -webkit-linear-gradient(top,  #fdd 0%, #500 100%);
