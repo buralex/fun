@@ -310,6 +310,26 @@ class Game extends Component {
                 this.isBallReflectingFromPaddle = false;
             }
 
+            // // Check for collisions with the blocks, we look for intersections of block sides and ball path
+            // for (let i = 0; i < brickNodes.length; ++i) {
+            //     let block = brickNodes[i];
+            //
+            //     console.log(block);
+            //
+            //     // let blockCollision = this.rectangleIntersect(
+            //     //     block.offsetLeft, block.offsetTop, block.offsetWidth, block.offsetHeight,
+            //     //     ball.x, ball.y, ballWidth, ballWidth);
+            //
+            //     if (blockCollision) {
+            //         //debugger
+            //         //console.log('collision');
+            //         //this.reflectBallFromBlock(this.ball, block);
+            //         //this.blocks.splice(i, 1);
+            //         //game.sounds.playSound('beep');
+            //         //break;
+            //     }
+            // }
+
             // if (time > 1000) {
             //     window.cancelAnimationFrame(_this.requestframeref);
             // }
