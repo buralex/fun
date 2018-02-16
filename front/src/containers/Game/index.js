@@ -181,8 +181,7 @@ class Game extends Component {
 
     // Return a suitable start angle
     getThetaStartAngle = () => {
-        //return this.random((-1 / 6) * Math.PI, (-5 / 6) * Math.PI);  //from -150 to -30 degrees
-        return (-1 * Math.PI) / 2;  //from -150 to -30 degrees
+        return this.random((-1 / 6) * Math.PI, (-5 / 6) * Math.PI);  //from -150 to -30 degrees
     }
 
     reflectBallFromTop = (ball) => {
