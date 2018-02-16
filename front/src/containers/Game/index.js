@@ -34,7 +34,7 @@ class Game extends Component {
                 theta: (-1 * Math.PI) / 2,
                 last_x: 0,
                 last_y: 0,
-                speed: 200,
+                speed: 800,
             },
             paddle: {
                 x:0,
@@ -181,7 +181,8 @@ class Game extends Component {
 
     // Return a suitable start angle
     getThetaStartAngle = () => {
-        return this.random((-1 / 6) * Math.PI, (-5 / 6) * Math.PI);  //from -150 to -30 degrees
+        //return this.random((-1 / 6) * Math.PI, (-5 / 6) * Math.PI);  //from -150 to -30 degrees
+        return (-1 * Math.PI) / 2;  //from -150 to -30 degrees
     }
 
     reflectBallFromTop = (ball) => {
@@ -268,7 +269,7 @@ class Game extends Component {
     };
 
     getRectPart = (elem, x, y) => {
-
+        let partName;
         let w = elem.offsetWidth;
         let h = elem.offsetHeight;
 
@@ -291,7 +292,7 @@ class Game extends Component {
         //console.log(this.getRectPart(10, 10, -8, 0));
 
         const frame = (time) => {
-            //console.log(ball);
+            console.log(ball.theta);
 
             /*---------------------------------------------------------------------
                     ball movement
@@ -372,8 +373,20 @@ class Game extends Component {
 
                 const cellPart = this.getRectPart(cell, ball.x + ball.radius, ball.y + ball.radius);
 
+                if (cellPart === 0) {
+                    this.reflectBallFromBottom(ball);
+                }
+
+                if (cellPart === 1) {
+                    this.reflectBallFromLeft(ball);
+                }
+
                 if (cellPart === 2) {
                     this.reflectBallFromTop(ball);
+                }
+
+                if (cellPart === 3) {
+                    this.reflectBallFromRight(ball);
                 }
 
                 //console.log(cell);
