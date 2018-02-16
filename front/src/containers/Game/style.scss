@@ -44,14 +44,39 @@ body {
 
 #paddle {
   border: 1px solid #777;
-  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #cdd), color-stop(100%, #777));
-  background: -webkit-linear-gradient(top,  #cdd 0%, #777 100%);
-  background: linear-gradient(to bottom,  #cdd 0%, #777 100%);
+  //background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #cdd), color-stop(100%, #777));
+  //background: -webkit-linear-gradient(top,  #cdd 0%, #777 100%);
+  //background: linear-gradient(to bottom,  #cdd 0%, #777 100%);
   position: absolute;
   left: 128px;
   top: 470px;
-  border-radius: 3px;
+  //border-radius: 3px;
+
+  &:after {
+    content: '';
+    display: block;
+    width: 30%;
+    height: 100%;
+    margin-left: auto;
+    background-color: #c19a6b;
+  }
 }
+
+/*--------------------------------------------------------------------
+    cigarette
+----------------------------------------------------------------------*/
+
+
+.cigarette-filter {
+  width: 30%;
+  height: 100%;
+  margin-left: auto;
+  background-color: #c19a6b;
+}
+
+/*---------------------------------------------------------------------
+    end cigarette
+-----------------------------------------------------------------------*/
 
 #ball {
   border: 1px solid #955;

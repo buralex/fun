@@ -238,12 +238,57 @@ class Game extends Component {
         return false;
     }
 
+    /**
+     * Calculates the side to which the ball hits
+     */
+    /**
+     * Calculates part of rectangle depending on the coordinates
+     * @param w - width
+     * @param h - height
+     * @param x - coordinate X, origin in the middle of rectangle
+     * @param y - coordinate Y, origin in the middle of rectangle
+     * @returns {number} 0: top, 1: right, 2: bottom, 3: left
+     */
+    calcRectPart = (w, h, x, y) => {
+        // var w = obj.offsetWidth,
+        //     h = obj.offsetHeight,
+        //     x = (ev.clientX - obj.getBoundingClientRect().left - (w / 2) ),
+        //     y = (ev.clientY - obj.getBoundingClientRect().top - (h / 2) ),
+        let d;
+        let angle = Math.atan(h/w)/(Math.PI / 180);
+        let pointAngle = Math.abs(Math.atan(y/x)/(Math.PI / 180));
+        let angle2 = Math.atan(w/h)/(Math.PI / 180);
+        let pointAngle2 = Math.abs(Math.atan(x/y)/(Math.PI / 180));
+
+        if (y<0 && angle < pointAngle) {d = 0;}
+        if (x>0 && angle2 < pointAngle2) {d = 1;}
+        if (y>0 && angle < pointAngle) {d = 2;}
+        if (x<0 && angle2 < pointAngle2) {d = 3;}
+        return d;
+    };
+
+    getRectPart = (elem, x, y) => {
+
+        let w = elem.offsetWidth;
+        let h = elem.offsetHeight;
+
+        // coords of ball relatively to brick middle
+        let coordX = (x - elem.offsetLeft - (w / 2) );
+        let coordY = (y - elem.offsetTop - (h / 2) );
+
+        return this.calcRectPart(w, h, coordX, coordY);
+    }
+
+
+
     draw = ({ width, height, brickNodes, ball, ballNode, paddle, paddleNode, lives, dt }) => {
 
         // Set a random start direction for the ball
         ball.theta = this.getThetaStartAngle();
 
         console.log('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA');
+
+        //console.log(this.getRectPart(10, 10, -8, 0));
 
         const frame = (time) => {
             //console.log(ball);
@@ -309,6 +354,51 @@ class Game extends Component {
             } else {
                 this.isBallReflectingFromPaddle = false;
             }
+
+            const brickWidth = brickNodes[0].offsetWidth;
+            const brickHeight = brickNodes[0].offsetHeight;
+
+            // on which row the ball is located (begining from 0)
+            const row = Math.ceil((parseInt(ball.y) + ball.radius) / brickHeight) - 1;
+
+            // on which col the ball is located (begining from 0)
+            const col = Math.ceil((parseInt(ball.x) + ball.radius) / brickWidth) - 1;
+
+            let cell = brickNodes[row * (width / brickWidth) + col];
+
+            if (cell && cell.classList.contains('brick') && !cell.classList.contains('removed')) {
+
+                cell.classList.add('removed');
+
+                const cellPart = this.getRectPart(cell, ball.x + ball.radius, ball.y + ball.radius);
+
+                if (cellPart === 2) {
+                    this.reflectBallFromTop(ball);
+                }
+
+                //console.log(cell);
+
+                //console.log(this.getRectPart(cell, ball.x + ball.radius, ball.y + ball.radius));
+
+                // dy *= -1;
+                //
+                // cell.classList.add('removed');
+                //
+                // // changes direction only if ball hits left or right part of brick
+                // if (dx < 0 && ((bx | 0) % 10 < 4 || (bx | 0) % 10 > 6)) {dx *= -1;}
+                // if (dx > 0 && (((bx + 12) | 0) % 10 < 4 || ((bx + 12) | 0) % 10 > 6)) {dx *= -1;}
+            }
+
+            // let cell;
+
+            // if (brickNodes[row * (width / brickWidth) + col] !== undefined) {
+            //     cell = brickNodes[row * 50 + col];
+            // }
+
+            // console.log(row);
+            // if (col == 1) {
+            // debugger
+            // }
 
             // // Check for collisions with the blocks, we look for intersections of block sides and ball path
             // for (let i = 0; i < brickNodes.length; ++i) {
@@ -403,7 +493,7 @@ class Game extends Component {
                     return row.map((col, k) => {
                         //console.log(col);
                         return (
-                            <div key={i+k} row={`${i}`} col={`${k}`} className={`${col === 0 ? 'cell': 'brick'}`}/>
+                            <div key={i+k} brickrow={`${i}`} brickcol={`${k}`} className={`${col === 0 ? 'cell': 'brick'}`}/>
                         );
                     });
 
@@ -412,7 +502,7 @@ class Game extends Component {
 
                 }
 
-                <div ref={(paddle) => {this.gameParams.paddleNode = paddle}} style={paddleStyle} id="paddle"/>
+                <div ref={(paddle) => {this.gameParams.paddleNode = paddle}} style={paddleStyle} id="paddle" />
                 <div ref={(ball) => {this.gameParams.ballNode = ball}} style={ballStyle} id="ball" />
                 <div ref={(livesNode) => {this.gameParams.livesNode = livesNode}} id="livesNode">3</div>
                 <div ref={(scoreNode) => {this.gameParams.scoreNode = scoreNode}} id="scoreNode">0</div>
