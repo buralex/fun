@@ -1,16 +1,20 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
-import './App.css';
-import Game from '../containers/Game';
 
+import 'normalize.css';
+import './App.css';
+import logo from './logo.svg';
+
+import Game from '../containers/Game';
+import NightSky from '../containers/Game/components/NightSky';
 
 class App extends Component {
   render() {
     return (
       <div className="App">
-
-        <Game/>
-
+          <div className="wrapper">
+              <Game/>
+              <NightSky/>
+          </div>
       </div>
     );
   }

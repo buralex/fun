@@ -1,23 +1,28 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 
 import './style.css';
 
 import bricks from './bricks';
 
-class Game extends Component {
+//import bricks from './b1';
+
+export default class Game extends PureComponent {
 
     constructor(props) {
         super(props);
 
-        console.log(this.paddleNode);
+        this.state = {
+            ballSpeed: 300,
+            showField: false,
+            countdown: {
+                sec: 3,
+                show: false,
+            },
+        };
+
+        this.brokenBricks = 0;
 
         this.gameParams = {
-            // // css position of paddle
-            // px: 128,
-            //
-            // // offset ball per cycle (px)
-            // dx: -2,
-            // dy: -2,
             width: 700,
             height: 700,
             lives: 100,
@@ -30,11 +35,9 @@ class Game extends Component {
                 x: 0,
                 y: 0,
                 radius: 5,
+                diam: 10,
                 //  theta is the angle the ball direction makes with the x axis. from -PI to PI, -PI/2 is vertically up, PI/2 is verticall down
                 theta: (-1 * Math.PI) / 2,
-                last_x: 0,
-                last_y: 0,
-                speed: 800,
             },
             paddle: {
                 x:0,
@@ -53,12 +56,6 @@ class Game extends Component {
             // paddleNode: null,
         }
 
-        //this.isBallReflectingFromPaddle = false;
-
-        this.state = {
-            speed: 1,
-            needsRefresh: false,
-        };
 
         window.requestAnimationFrame = window.requestAnimationFrame
             || window.mozRequestAnimationFrame
@@ -72,106 +69,28 @@ class Game extends Component {
     }
 
     componentDidMount() {
+        if (this.gameParams.fieldNode) {
 
-        const gp = this.gameParams;
+            const gp = this.gameParams;
 
-        this.initParams(gp);
-
-        this.handlePaddleMovement(gp);
-
-        this.draw(gp);
-
+            this.initParams(gp);
+            this.handlePaddleMovement(gp);
+            this.draw(gp);
+        }
     }
 
     componentDidUpdate() {
         console.log('update');
-        window.cancelAnimationFrame(this.requestframeref);
+        if (this.gameParams.fieldNode) {
 
-        const gp = this.gameParams;
+            window.cancelAnimationFrame(this.requestframeref);
 
-        this.initParams(gp);
+            const gp = this.gameParams;
 
-        this.draw(gp);
-    }
-
-    handlePaddleMovement = ({paddle, paddleNode, width, fieldNode}) => {
-
-        document.addEventListener('mousemove', (e) => {
-            //px = (e.pageX > 40) ? ((e.pageX < 290) ? e.pageX - 40 : 256) : 0;
-            //paddle.style.left = px + 'px';
-
-            //let percentageScreen = parseInt(e.pageX*100/document.documentElement.clientWidth);
-            let pageX = parseInt(e.pageX)
-            let fieldLeftBound = fieldNode.getBoundingClientRect().x;
-
-            if (pageX < fieldLeftBound) {
-                paddle.x = 0;
-            } else if ((pageX + paddle.width) > (fieldLeftBound + width)) {
-                paddle.x = width - paddle.width;
-
-                // console.log('cursorX: ',pageX);
-                // console.log('real cursor + paddle width: ', (pageX + paddle.width));
-                // console.log('boundary: ', (fieldLeftBound + width));
-            } else {
-                paddle.x = pageX - fieldLeftBound;
-            }
-
-            paddleNode.style.left = `${paddle.x}px`;
-
-            // console.log(paddle.offsetWidth);
-
-            //paddleNode.style.left = `${percentageScreen}%`;
-
-
-        }, false);
-
-        // document.addEventListener('mousemove', (e) => {
-        //
-        //     //  Keep the paddle in bounds
-        //     // if (paddle.x < 0 + (paddle.width / 2)) {
-        //     //     paddle.x = 0 + (paddle.width / 2);
-        //     // }
-        //     // if (this.paddle.x > game.gameBounds.right - (this.paddle.width / 2)) {
-        //     //     this.paddle.x = game.gameBounds.right - (this.paddle.width / 2);
-        //     // }
-        //
-        //     //console.log(e.pageX);
-        //     //console.log(window.innerWidth);
-        //
-        //     //paddle.x = e.pageX;
-        //
-        //     // // Keep the paddle in bounds
-        //     // if (e.pageX < 0 + (paddle.width / 2)) {
-        //     //     paddle.x = 0 + (paddle.width / 2);
-        //     // }
-        //     // if (this.paddle.x > game.gameBounds.right - (this.paddle.width / 2)) {
-        //     //     this.paddle.x = game.gameBounds.right - (this.paddle.width / 2);
-        //     // }
-        //
-        //     // paddle.x = (e.pageX > 40) ? ((e.pageX < 480) ? e.pageX - 40 : 439) : 0;
-        //     paddleNode.style.left = `${paddle.x}px`;
-        // }, false);
-    }
-
-    initParams = ({width, height, paddle, ball, paddingBottom, paddleNode}) => {
-
-        paddle.x = width / 2;
-        paddle.y = height - paddle.height - paddingBottom;
-
-        ball.x = paddle.x;
-        ball.y = paddle.y - paddle.height / 2;
-
-        console.log(paddleNode);
-        console.log(paddleNode);
-
-        paddleNode.style.top = `${paddle.y}px`;
-
-        // this.gameBounds = {
-        //     left: width / 2 - this.config.gameWidth / 2,
-        //     right: width / 2 + this.config.gameWidth / 2,
-        //     top: height / 2 - this.config.gameHeight / 2,
-        //     bottom: height / 2 + this.config.gameHeight / 2,
-        // }
+            this.initParams(gp);
+            this.handlePaddleMovement(gp);
+            this.draw(gp);
+        }
     }
 
     // Return a random number in between x and y
@@ -182,6 +101,55 @@ class Game extends Component {
     // Return a suitable start angle
     getThetaStartAngle = () => {
         return this.random((-1 / 6) * Math.PI, (-5 / 6) * Math.PI);  //from -150 to -30 degrees
+    }
+
+    initParams = ({width, height, paddle, ball, paddingBottom, paddleNode, ballNode}) => {
+
+        // count visible bricks
+        let counts = {};
+
+        bricks.forEach((arr) => {
+            arr.forEach((x) => {
+                counts[x] = (counts[x] || 0)+1;
+            });
+        });
+
+        this.visibleBricksCount = counts[1];
+
+        // Set a random start direction for the ball
+        ball.theta = this.getThetaStartAngle();
+
+        paddle.x = width / 2 - (paddle.width / 2);
+        paddle.y = height - paddle.height - paddingBottom;
+
+        ball.x = paddle.x;
+        ball.y = paddle.y - ball.diam;
+
+        paddleNode.style.left = `${paddle.x}px`;
+        paddleNode.style.top = `${paddle.y}px`;
+
+        ballNode.style.left = `${ball.x}px`;
+        ballNode.style.top = `${ball.y}px`;
+    }
+
+    handlePaddleMovement = ({paddle, paddleNode, width, fieldNode}) => {
+
+        document.addEventListener('mousemove', (e) => {
+            //console.log('MOVEMENT_____________');
+            let pageX = parseInt(e.pageX);
+            let fieldLeftBound = fieldNode.getBoundingClientRect().x;
+
+            if (pageX < fieldLeftBound) {
+                paddle.x = 0;
+            } else if ((pageX + paddle.width) > (fieldLeftBound + width)) {
+                paddle.x = width - paddle.width;
+
+            } else {
+                paddle.x = pageX - fieldLeftBound;
+            }
+
+            paddleNode.style.left = `${paddle.x}px`;
+        }, false);
     }
 
     reflectBallFromTop = (ball) => {
@@ -227,12 +195,11 @@ class Game extends Component {
         let p1_y = c1_y - height1 / 2;
         let p2_x = c2_x - width2 / 2;
         let p2_y = c2_y - height2 / 2;
-//debugger
+
         if (p1_x < p2_x + width2 &&
             p1_x + width1 > p2_x &&
             p1_y < p2_y + height2 &&
             height1 + p1_y > p2_y) {
-            console.log('INTERSECT------------------->>>>>>>');
             return true;
         }
         return false;
@@ -250,25 +217,21 @@ class Game extends Component {
      * @returns {number} 0: top, 1: right, 2: bottom, 3: left
      */
     calcRectPart = (w, h, x, y) => {
-        // var w = obj.offsetWidth,
-        //     h = obj.offsetHeight,
-        //     x = (ev.clientX - obj.getBoundingClientRect().left - (w / 2) ),
-        //     y = (ev.clientY - obj.getBoundingClientRect().top - (h / 2) ),
         let d;
         let angle = Math.atan(h/w)/(Math.PI / 180);
         let pointAngle = Math.abs(Math.atan(y/x)/(Math.PI / 180));
         let angle2 = Math.atan(w/h)/(Math.PI / 180);
         let pointAngle2 = Math.abs(Math.atan(x/y)/(Math.PI / 180));
 
-        if (y<0 && angle < pointAngle) {d = 0;}
-        if (x>0 && angle2 < pointAngle2) {d = 1;}
-        if (y>0 && angle < pointAngle) {d = 2;}
-        if (x<0 && angle2 < pointAngle2) {d = 3;}
+        if (y < 0 && angle < pointAngle) {d = 0;}
+        if (x > 0 && angle2 < pointAngle2) {d = 1;}
+        if (y > 0 && angle < pointAngle) {d = 2;}
+        if (x < 0 && angle2 < pointAngle2) {d = 3;}
+
         return d;
     };
 
     getRectPart = (elem, x, y) => {
-        let partName;
         let w = elem.offsetWidth;
         let h = elem.offsetHeight;
 
@@ -283,43 +246,29 @@ class Game extends Component {
 
     draw = ({ width, height, brickNodes, ball, ballNode, paddle, paddleNode, lives, dt }) => {
 
-        // Set a random start direction for the ball
-        ball.theta = this.getThetaStartAngle();
-
-        console.log('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA');
-
-        //console.log(this.getRectPart(10, 10, -8, 0));
-
         const frame = (time) => {
-            console.log(ball.theta);
-
             /*---------------------------------------------------------------------
                     ball movement
             * -------------------------------------------------------------------*/
-            //console.log('tic ', ball.x);
 
             // Move the ball
-            ball.last_x = ball.x;
-            ball.last_y = ball.y;
+            ball.x += dt * this.state.ballSpeed * Math.cos(ball.theta);
+            ball.y += dt * this.state.ballSpeed * Math.sin(ball.theta);
 
-
-            //console.log(ball);
-            //debugger
-
-            ball.x += dt * ball.speed * Math.cos(ball.theta);
-            ball.y += dt * ball.speed * Math.sin(ball.theta);
+            if (ball.x < 0) { ball.x = 0; }
+            if (ball.y < 0) { ball.y = 0; }
+            if ((ball.x + ball.diam) > width) { ball.x = width - ball.diam; }
+            if ((ball.y + ball.diam) > height) { ball.y = height - ball.diam; }
 
             ballNode.style.left = `${ball.x}px`;
             ballNode.style.top = `${ball.y}px`;
-            // console.log(ballNode.style);
-            // console.log(ballNode.style);
 
-            // Check for collisions with the bounds and paddle
+            // Check for collisions with the bounds
             if (ball.x <= 0) {
                 this.reflectBallFromLeft(ball);
             }
 
-            if (ball.x >= width - ball.radius * 2) {
+            if (ball.x >= width - ball.diam) {
                 this.reflectBallFromRight(ball);
             }
 
@@ -329,24 +278,37 @@ class Game extends Component {
             }
 
             // Check for collisions with the bottom
-            if (ball.y >= height - ball.radius * 2) {
+            if (ball.y >= height - ball.diam) {
                 //this.looseLife();
-
                 this.reflectBallFromBottom(ball);
             }
 
-            // Check for collisions with the paddle
-            let ballWidth = ball.radius * 2;
+
+            // check for collisions with the paddle
+            const brickWidth = brickNodes[0].offsetWidth;
+            const brickHeight = brickNodes[0].offsetHeight;
+
+            let correctionDims = ball.radius;
+
+            if (this.state.ballSpeed > 300 && this.state.ballSpeed <= 400) {
+                correctionDims = ball.radius + (ball.radius / 2);
+            } else if (this.state.ballSpeed > 500) {
+                correctionDims = ball.diam;
+            }
+
+            // console.log(correctionDims);
+            // console.log(this.state.ballSpeed);
 
             let paddleCollision = this.rectangleIntersect(
                 paddle.x + (paddle.width / 2), paddle.y + (paddle.height / 2), paddle.width, paddle.height,
-                ball.x, ball.y, ballWidth, ballWidth
+                ball.x + ball.radius, ball.y + correctionDims, ball.diam, ball.diam
             );
 
             if (paddleCollision) {
                 if (this.isBallReflectingFromPaddle) {
                     // we have a collision but ball is already reflecting from the paddle so ignore it
                 } else {
+                    console.log('collision ball Y: ',ball.y);
                     //.sounds.playSound('pong');
                     this.isBallReflectingFromPaddle = true;
                     this.reflectBallFromPaddle(ball, paddle);
@@ -355,8 +317,6 @@ class Game extends Component {
                 this.isBallReflectingFromPaddle = false;
             }
 
-            const brickWidth = brickNodes[0].offsetWidth;
-            const brickHeight = brickNodes[0].offsetHeight;
 
             // on which row the ball is located (begining from 0)
             const row = Math.ceil((parseInt(ball.y) + ball.radius) / brickHeight) - 1;
@@ -367,6 +327,8 @@ class Game extends Component {
             let cell = brickNodes[row * (width / brickWidth) + col];
 
             if (cell && cell.classList.contains('brick') && !cell.classList.contains('removed')) {
+
+                this.brokenBricks += 1;
 
                 cell.classList.add('removed');
 
@@ -387,84 +349,100 @@ class Game extends Component {
                 if (cellPart === 3) {
                     this.reflectBallFromRight(ball);
                 }
-
-                //console.log(cell);
-
-                //console.log(this.getRectPart(cell, ball.x + ball.radius, ball.y + ball.radius));
-
-                // dy *= -1;
-                //
-                // cell.classList.add('removed');
-                //
-                // // changes direction only if ball hits left or right part of brick
-                // if (dx < 0 && ((bx | 0) % 10 < 4 || (bx | 0) % 10 > 6)) {dx *= -1;}
-                // if (dx > 0 && (((bx + 12) | 0) % 10 < 4 || ((bx + 12) | 0) % 10 > 6)) {dx *= -1;}
             }
+            /*-----------------------------------------------------
+                end check for collisions with the paddle
+            * --------------------------------------------------*/
 
-            // let cell;
-
-            // if (brickNodes[row * (width / brickWidth) + col] !== undefined) {
-            //     cell = brickNodes[row * 50 + col];
-            // }
-
-            // console.log(row);
-            // if (col == 1) {
-            // debugger
-            // }
-
-            // // Check for collisions with the blocks, we look for intersections of block sides and ball path
-            // for (let i = 0; i < brickNodes.length; ++i) {
-            //     let block = brickNodes[i];
-            //
-            //     console.log(block);
-            //
-            //     // let blockCollision = this.rectangleIntersect(
-            //     //     block.offsetLeft, block.offsetTop, block.offsetWidth, block.offsetHeight,
-            //     //     ball.x, ball.y, ballWidth, ballWidth);
-            //
-            //     if (blockCollision) {
-            //         //debugger
-            //         //console.log('collision');
-            //         //this.reflectBallFromBlock(this.ball, block);
-            //         //this.blocks.splice(i, 1);
-            //         //game.sounds.playSound('beep');
-            //         //break;
-            //     }
-            // }
-
-            // if (time > 1000) {
-            //     window.cancelAnimationFrame(_this.requestframeref);
-            // }
 
             /*---------------------------------------------------------------------
                     end ball movement
             * -------------------------------------------------------------------*/
-
-            this.requestframeref = window.requestAnimationFrame(frame);
+            if (this.brokenBricks < this.visibleBricksCount) {
+                this.requestframeref = window.requestAnimationFrame(frame);
+            } else {
+                console.log('WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW');
+                window.cancelAnimationFrame(this.requestframeref);
+                this.winTheGame();
+            }
         }
 
         window.requestAnimationFrame(frame);
     }
 
+    winTheGame = () => {
+
+    }
+
 
     increaseSpeed = () => {
-        console.log('increase');
-        this.gameParams.dx -= 5;
-        this.gameParams.dy -= 5;
 
         this.setState(prevState => ({
-            speed: Math.abs(this.gameParams.dx),
+            ballSpeed: prevState.ballSpeed < 700 ? prevState.ballSpeed + 100 : 700,
         }));
     }
 
     decreaseSpeed = () => {
         console.log('decreace');
-        this.gameParams.dx += 5;
-        this.gameParams.dy += 5;
 
         this.setState(prevState => ({
-            speed: Math.abs(this.gameParams.dx),
+            ballSpeed: prevState.ballSpeed > 100 ? prevState.ballSpeed - 100 : 100,
         }));
+    }
+
+    tick() {
+        console.log(this.state.countdown);
+        if (this.state.countdown.sec <= 1) {
+            this.setState(prevState => ({
+                showField: true,
+                countdown: {
+                    ...prevState.countdown,
+                    show: false,
+                },
+            }));
+
+
+            clearInterval(this.interval);
+
+        } else {
+
+            console.log(this.state.countdown);
+            this.setState(prevState => ({
+                countdown: {
+                    ...prevState.countdown,
+                    sec: prevState.countdown.sec - 1,
+                },
+            }));
+        }
+    }
+
+    startGame = (e) => {
+        console.log(e.target);
+        e.target.style.display = 'none';
+        this.interval = setInterval(() => this.tick(), 1000);
+
+        this.setState(prevState => ({
+            countdown: {
+                ...prevState.countdown,
+                show: true,
+            },
+        }));
+
+        console.log(this.state);
+
+        document.addEventListener('keydown', (e) => {
+
+            console.log(e.keyCode);
+
+            if (e.keyCode === 87) {
+                this.increaseSpeed();
+            }
+
+            if (e.keyCode === 83) {
+                this.decreaseSpeed();
+            }
+
+        }, false);
     }
 
 
@@ -481,8 +459,8 @@ class Game extends Component {
         console.log(bricks);
 
         const ballStyle = {
-            width: ball.radius * 2,
-            height: ball.radius * 2,
+            width: ball.diam,
+            height: ball.diam,
         };
 
         const paddleStyle = {
@@ -491,39 +469,56 @@ class Game extends Component {
         };
 
         return (
-            <div
-                ref={(field) => {
-                    if (field) {
-                        this.gameParams.brickNodes = field.children;
-                        this.gameParams.fieldNode = field;
-                    }
-                }}
-                id="field"
-            >
-
-                {bricks.map((row, i) => {
-                    return row.map((col, k) => {
-                        //console.log(col);
-                        return (
-                            <div key={i+k} brickrow={`${i}`} brickcol={`${k}`} className={`${col === 0 ? 'cell': 'brick'}`}/>
-                        );
-                    });
-
-
-                })
-
+            <div className="game-container">
+                {!this.state.showField &&
+                    <button onClick={this.startGame}>
+                        play
+                    </button>
                 }
 
-                <div ref={(paddle) => {this.gameParams.paddleNode = paddle}} style={paddleStyle} id="paddle" />
-                <div ref={(ball) => {this.gameParams.ballNode = ball}} style={ballStyle} id="ball" />
-                <div ref={(livesNode) => {this.gameParams.livesNode = livesNode}} id="livesNode">3</div>
-                <div ref={(scoreNode) => {this.gameParams.scoreNode = scoreNode}} id="scoreNode">0</div>
+                {this.state.countdown.show &&
+                    <div style={{color: 'white'}}>
+                        {this.state.countdown.sec}
+                    </div>
+                }
 
-                {/*<button onClick={this.increaseSpeed}>increase</button>*/}
-                {/*<button onClick={this.decreaseSpeed}>decrease</button>*/}
+                {
+                    this.state.showField &&
+                    //1 &&
+                    <div
+                        ref={(field) => {
+                            if (field) {
+                                this.gameParams.brickNodes = field.children;
+                                this.gameParams.fieldNode = field;
+                            }
+                        }}
+                        id="field"
+                    >
+
+                        {bricks.map((row, i) => {
+                            return row.map((col, k) => {
+                                //console.log(col);
+                                return (
+                                    <div key={i+k} brickrow={`${i}`} brickcol={`${k}`} className={`${col === 0 ? 'cell': 'brick'}`}/>
+                                );
+                            });
+
+
+                        })
+
+                        }
+
+                        <div ref={(paddle) => {this.gameParams.paddleNode = paddle}} style={paddleStyle} id="paddle" />
+                        <div ref={(ball) => {this.gameParams.ballNode = ball}} style={ballStyle} id="ball" />
+                        <div ref={(livesNode) => {this.gameParams.livesNode = livesNode}} id="livesNode">3</div>
+                        <div ref={(scoreNode) => {this.gameParams.scoreNode = scoreNode}} id="scoreNode">0</div>
+                        <div style={{color: 'white'}} id="scoreNode">
+                            {this.state.ballSpeed}
+                        </div>
+                    </div>
+                }
             </div>
         );
     }
 }
 
-export default Game;
