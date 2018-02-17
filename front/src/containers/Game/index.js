@@ -12,7 +12,7 @@ export default class Game extends PureComponent {
         super(props);
 
         this.state = {
-            ballSpeed: 300,
+            ballSpeed: 700,
             showField: false,
             countdown: {
                 sec: 3,
@@ -104,6 +104,17 @@ export default class Game extends PureComponent {
     }
 
     initParams = ({width, height, paddle, ball, paddingBottom, paddleNode, ballNode}) => {
+
+
+
+        this.cigaretteSong.volume = 0.2;
+        this.cigaretteSong.loop = true;
+        this.cigaretteSong.play();
+
+        var x = document.getElementById("justAcigarette");
+
+        console.log(this.cigaretteSong);
+        console.log(x);
 
         // count visible bricks
         let counts = {};
@@ -251,10 +262,13 @@ export default class Game extends PureComponent {
                     ball movement
             * -------------------------------------------------------------------*/
 
+            console.log(this.state.ballSpeed);
+
             // Move the ball
             ball.x += dt * this.state.ballSpeed * Math.cos(ball.theta);
             ball.y += dt * this.state.ballSpeed * Math.sin(ball.theta);
 
+            // forbid a ball to go beyond
             if (ball.x < 0) { ball.x = 0; }
             if (ball.y < 0) { ball.y = 0; }
             if ((ball.x + ball.diam) > width) { ball.x = width - ball.diam; }
@@ -377,17 +391,20 @@ export default class Game extends PureComponent {
 
     increaseSpeed = () => {
 
-        this.setState(prevState => ({
-            ballSpeed: prevState.ballSpeed < 700 ? prevState.ballSpeed + 100 : 700,
-        }));
+        if (this.state.ballSpeed < 700) {
+            this.setState(prevState => ({
+                ballSpeed: prevState.ballSpeed + 100,
+            }));
+        }
     }
 
     decreaseSpeed = () => {
         console.log('decreace');
-
-        this.setState(prevState => ({
-            ballSpeed: prevState.ballSpeed > 100 ? prevState.ballSpeed - 100 : 100,
-        }));
+        if (this.state.ballSpeed > 100) {
+            this.setState(prevState => ({
+                ballSpeed: prevState.ballSpeed - 100,
+            }));
+        }
     }
 
     tick() {
@@ -434,11 +451,11 @@ export default class Game extends PureComponent {
 
             console.log(e.keyCode);
 
-            if (e.keyCode === 87) {
+            if (e.keyCode === 87 || e.keyCode === 38) {
                 this.increaseSpeed();
             }
 
-            if (e.keyCode === 83) {
+            if (e.keyCode === 83 || e.keyCode === 40) {
                 this.decreaseSpeed();
             }
 
@@ -517,6 +534,10 @@ export default class Game extends PureComponent {
                         </div>
                     </div>
                 }
+                <audio ref={(elem) => {this.cigaretteSong = elem}} id="justAcigarette">
+                    <source src="media/princess-chelsea-the-cigarette-duet.mp3" type="audio/mpeg"/>
+                </audio>
+
             </div>
         );
     }
