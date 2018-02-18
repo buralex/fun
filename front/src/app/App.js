@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 
 import 'normalize.css';
-import './App.css';
-import logo from './logo.svg';
+import './index.css';
+
 
 import Game from '../containers/Game';
 import NightSky from '../containers/Game/components/NightSky';

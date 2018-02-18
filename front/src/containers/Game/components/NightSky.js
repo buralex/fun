@@ -1,4 +1,4 @@
-import React, { PureComponent } from 'react';
+import React, { PureComponent, Fragment } from 'react';
 
 //import './style.css';
 
@@ -113,9 +113,9 @@ export default class NightSky extends PureComponent {
 
 
         return (
-            <div>
+            <Fragment>
                 <canvas id="bgCanvas"/>
-            </div>
+            </Fragment>
         );
     }
 }

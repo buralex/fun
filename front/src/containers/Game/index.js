@@ -1,10 +1,13 @@
-import React, { PureComponent } from 'react';
+import React, { PureComponent, Fragment } from 'react';
+
+
+import debounce from "lodash/debounce";
 
 import './style.css';
 
-import bricks from './bricks';
+//import bricks from './bricks';
 
-//import bricks from './b1';
+import bricks from './b1';
 
 export default class Game extends PureComponent {
 
@@ -12,9 +15,11 @@ export default class Game extends PureComponent {
         super(props);
 
         this.state = {
-            ballsCount: 2,
-            ballSpeed: 300,
+            // each ball it's another 1
+            ballsArr: [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,],
+            ballSpeed: 600,
             showField: false,
+            winning: false,
             countdown: {
                 sec: 3,
                 show: false,
@@ -34,15 +39,8 @@ export default class Game extends PureComponent {
             paddingBottom: 30,
             dt: 1 / 50, // 50fps
 
-            // initial positioning
-            ball: {
-                x: 0,
-                y: 0,
-                radius: 5,
-                diam: 10,
-                //  theta is the angle the ball direction makes with the x axis. from -PI to PI, -PI/2 is vertically up, PI/2 is verticall down
-                theta: (-1 * Math.PI) / 2,
-            },
+            balls: [],
+
             paddle: {
                 x:0,
                 y:0,
@@ -52,13 +50,34 @@ export default class Game extends PureComponent {
                 speed: 300,
             },
 
+            ballNodes: [],
+
             // elements (DOM nodes)
             // brickNodes: this.brickNodes,
-            // ballNode: null,
+
             // livesNode: null,
             // scoreNode: null,
             // paddleNode: null,
         }
+
+        this.ballParams = {
+            x: 0,
+            y: 0,
+            last_x: 0,
+            last_y: 0,
+            radius: 5,
+            diam: 10,
+            //  theta is the angle the ball direction makes with the x axis. from -PI to PI, -PI/2 is vertically up, PI/2 is verticall down
+            theta: (-1 * Math.PI) / 2,
+            id: 0,
+        };
+
+        this.playMusic = debounce(this.playMusic, 100);
+        this.increaseSpeed = debounce(this.increaseSpeed, 100);
+        this.decreaseSpeed = debounce(this.decreaseSpeed, 100);
+
+        this.increaseBalls = debounce(this.increaseBalls, 100);
+        this.decreaseBalls = debounce(this.decreaseBalls, 100);
 
 
         window.requestAnimationFrame = window.requestAnimationFrame
@@ -73,24 +92,58 @@ export default class Game extends PureComponent {
     }
 
     componentDidMount() {
-        if (this.gameParams.fieldNode) {
+        console.log('mount');
+        console.log(this.gameParams.fieldNode);
 
-            const gp = this.gameParams;
+        document.addEventListener('keydown', (e) => {
 
-            this.initParams(gp);
-            this.handlePaddleMovement(gp);
-            this.draw(gp);
-        }
+            console.log(e.keyCode);
+
+            if (e.keyCode === 32) {
+
+                if (!this.gameStarted) {
+                    this.gameStarted = true;
+                    console.log('aaaaaaaaaaaaaaaaaaaaaaaaa');
+                    this.startGame();
+                }
+            }
+
+
+        }, false);
+
+        // if (this.gameParams.fieldNode) {
+        //
+        //     const gp = this.gameParams;
+        //
+        //     this.initParams(gp);
+        //     this.handlePaddleMovement(gp);
+        //     this.draw(gp);
+        //
+        //
+        //     document.addEventListener('keydown', (e) => {
+        //
+        //         console.log(e.keyCode);
+        //
+        //         if (e.keyCode === 13) {
+        //             console.log('aaaaaaaaaaaaaaaaaaaaaaaaa');
+        //             this.startGame();
+        //         }
+        //
+        //
+        //     }, false);
+        // }
     }
 
     componentDidUpdate() {
         console.log('update');
-        if (this.gameParams.fieldNode) {
+        if (this.gameParams.fieldNode
+            && this.gameParams.ballNodes) {
 
-            console.log(this.requestframeref);
-            console.log(window);
+            // console.log(this.requestframeref);
+            // console.log(window);
+            console.log(this.gameParams.ballNodes);
 
-            console.log('CCCCCCCCFFFFFRRRRRROOOOOOMMMMUUUUUPPPPPDDAATTTEEE');
+            // console.log('CCCCCCCCFFFFFRRRRRROOOOOOMMMMUUUUUPPPPPDDAATTTEEE');
 
             //window.cancelAnimationFrame(this.requestframeref);
 
@@ -115,8 +168,8 @@ export default class Game extends PureComponent {
         return this.random((-1 / 6) * Math.PI, (-5 / 6) * Math.PI);  //from -150 to -30 degrees
     }
 
-    initParams = ({width, height, paddle, ball, paddingBottom, paddleNode, ballNode}) => {
-
+    initParams = ({width, height, paddle, balls, paddingBottom, paddleNode, ballNodes}) => {
+        /*---------------------------------------- bricks -----------------*/
         // count visible bricks
         let counts = {};
 
@@ -127,28 +180,37 @@ export default class Game extends PureComponent {
         });
 
         this.visibleBricksCount = counts[1];
-
-        // Set a random start direction for the ball
-        ball.theta = this.getThetaStartAngle();
+        /*---------------------------------------- end bricks -----------------*/
 
         paddle.x = width / 2 - (paddle.width / 2);
         paddle.y = height - paddle.height - paddingBottom;
 
-        ball.x = paddle.x;
-        ball.y = paddle.y - ball.diam;
-
         paddleNode.style.left = `${paddle.x}px`;
         paddleNode.style.top = `${paddle.y}px`;
 
-        ballNode.style.left = `${ball.x}px`;
-        ballNode.style.top = `${ball.y}px`;
+        //debugger
+
+        if (balls.length !== this.state.ballsArr.length) {
+            balls.length = 0;
+
+            this.state.ballsArr.forEach((elem, i) => {
+                balls.push({...this.ballParams, id: i});
+            });
+        }
+
+        balls.forEach((ball, i) => {
+            // Set a random start direction for the ball
+            ball.theta = this.getThetaStartAngle();
+
+            ball.x = paddle.x;
+            ball.y = paddle.y - ball.diam;
+        });
     }
 
     handlePaddleMovement = ({paddle, paddleNode, width, fieldNode}) => {
 
         document.addEventListener('mousemove', (e) => {
-            //console.log('MOVEMENT_____________');
-            let pageX = parseInt(e.pageX);
+            let pageX = parseInt(e.pageX, 10);
             let fieldLeftBound = fieldNode.getBoundingClientRect().x;
 
             if (pageX < fieldLeftBound) {
@@ -243,7 +305,7 @@ export default class Game extends PureComponent {
         return d;
     };
 
-    getRectPart = (elem, x, y) => {
+    getRectPart = (elem, x, y, last_x, last_y) => {
         let w = elem.offsetWidth;
         let h = elem.offsetHeight;
 
@@ -251,14 +313,27 @@ export default class Game extends PureComponent {
         let coordX = (x - elem.offsetLeft - (w / 2) );
         let coordY = (y - elem.offsetTop - (h / 2) );
 
-        return this.calcRectPart(w, h, coordX, coordY);
+        let coordLastX = (last_x - elem.offsetLeft - (w / 2) );
+        let coordLastY = (last_y - elem.offsetTop - (h / 2) );
+
+        const coef = 5; // 5px
+        const diffY = (y - last_y) + coef;
+        const diffX = (x - last_x) + coef;
+
+        //return this.calcRectPart(w, h, coordX, coordY);
+        return this.calcRectPart(w + (2 * diffX), h + (2 * diffY), coordX, coordY);
     }
 
 
-    calcMovementAndCollisions = () => {
+    calcMovementAndCollisions = (width, height, brickNodes, ball, ballNodes, paddle, dt) => {
         // Move the ball
+        ball.last_x = ball.x;
+        ball.last_y = ball.y;
+
         ball.x += dt * this.state.ballSpeed * Math.cos(ball.theta);
         ball.y += dt * this.state.ballSpeed * Math.sin(ball.theta);
+
+        //debugger
 
         // forbid a ball to go beyond
         if (ball.x < 0) { ball.x = 0; }
@@ -266,7 +341,7 @@ export default class Game extends PureComponent {
         if ((ball.x + ball.diam) > width) { ball.x = width - ball.diam; }
         if ((ball.y + ball.diam) > height) { ball.y = height - ball.diam; }
 
-
+//console.log(ball);
 
         // Check for collisions with the bounds
         if (ball.x <= 0) {
@@ -289,7 +364,9 @@ export default class Game extends PureComponent {
         }
 
 
-        // check for collisions with the paddle
+        /*------------------------------------------------
+            check for collisions with the paddle
+        --------------------------------------------------*/
         const brickWidth = brickNodes[0].offsetWidth;
         const brickHeight = brickNodes[0].offsetHeight;
 
@@ -314,7 +391,7 @@ export default class Game extends PureComponent {
                 // we have a collision but ball is already reflecting from the paddle so ignore it
             } else {
                 console.log('collision ball Y: ',ball.y);
-                //.sounds.playSound('pong');
+
                 this.isBallReflectingFromPaddle = true;
                 this.reflectBallFromPaddle(ball, paddle);
             }
@@ -337,7 +414,14 @@ export default class Game extends PureComponent {
 
             cell.classList.add('removed');
 
-            const cellPart = this.getRectPart(cell, ball.x + ball.radius, ball.y + ball.radius);
+            // const cellPart = this.getRectPart(cell, ball.x + ball.radius, ball.y + ball.radius);
+            const cellPart = this.getRectPart(
+                cell,
+                ball.x + ball.radius,
+                ball.y + ball.radius,
+                ball.last_x + ball.radius,
+                ball.last_y + ball.radius,
+            );
 
             if (cellPart === 0) {
                 this.reflectBallFromBottom(ball);
@@ -362,12 +446,12 @@ export default class Game extends PureComponent {
     }
 
 
-    draw = ({ width, height, brickNodes, balls, ballNode, paddle, paddleNode, lives, dt }) => {
+    draw = ({ width, height, brickNodes, balls, ballNodes, paddle, dt }) => {
 
         console.log('animations: ',this.animations);
         console.log('decreqaseBtn: ',this.decreaseBtn);
         console.log('canceled: ',this.canceledRequests);
-
+        console.log(ballNodes);
         const frame = (time) => {
             /*---------------------------------------------------------------------
                     ball movement
@@ -377,18 +461,31 @@ export default class Game extends PureComponent {
             // console.log('delta X:',dt * this.state.ballSpeed * Math.cos(ball.theta));
             // console.log('delta Y:',dt * this.state.ballSpeed * Math.sin(ball.theta));
 
-            this.balls.forEach((ball) => {
+            //console.log(ballNodes);
 
+            balls.forEach((ball, i) => {
+                this.calcMovementAndCollisions(width, height, brickNodes, ball, ballNodes, paddle, dt);
+
+                //console.log(ballNodes);
+
+                if (ballNodes[i]) {
+                    ballNodes[i].style.left = `${ball.x}px`;
+                    ballNodes[i].style.top = `${ball.y}px`;
+                }
             });
 
+            // this.ballNodes.forEach((ball) => {
+            //
+            // });
 
-            ballNode.style.left = `${ball.x}px`;
-            ballNode.style.top = `${ball.y}px`;
+
+            // ballNode.style.left = `${ball.x}px`;
+            // ballNode.style.top = `${ball.y}px`;
 
             if (this.brokenBricks < this.visibleBricksCount) {
                 this.requestframeref = window.requestAnimationFrame(frame);
 
-                console.log('last id: ', this.requestframeref);
+                //console.log('last id: ', this.requestframeref);
 
             } else {
                 console.log('WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWiiiiiiiiiinnnnnnnnnnnn');
@@ -413,7 +510,38 @@ export default class Game extends PureComponent {
     }
 
     winTheGame = () => {
+        this.setState(prevState => ({
+            winning: true,
+        }))
 
+        this.winningSong.volume = 0.2;
+        this.winningSong.loop = true;
+        this.winningSong.play();
+        this.mute.parentNode.style.display = 'none';
+    }
+
+    playWinningVideo = (vid) => {
+        if (vid) {
+            vid.loop = true;
+            vid.play();
+            console.log(vid);
+
+            this.playMusic();
+            //this.playWinningSong();
+        }
+    }
+
+
+    playMusic = () => {
+        console.log('TOGGLE MUSIC');
+
+        this.mute.classList.toggle('on');
+
+        if (this.song.paused) {
+            this.song.play();
+        }else{
+            this.song.pause();
+        }
     }
 
 
@@ -421,8 +549,6 @@ export default class Game extends PureComponent {
 
         if (this.state.ballSpeed < 600) {
             console.log('INCREASE');
-
-            //this.cancelAnimation();
 
             this.setState(prevState => ({
                 ballSpeed: prevState.ballSpeed + 100,
@@ -434,12 +560,36 @@ export default class Game extends PureComponent {
         console.log('decreace');
         if (this.state.ballSpeed > 100) {
             this.decreaseBtn += 1;
-
+            console.log('DECREASE');
             //this.cancelAnimation();
 
             this.setState(prevState => ({
                 ballSpeed: prevState.ballSpeed - 100,
             }));
+        }
+    }
+
+    increaseBalls = () => {
+
+        this.setState(prevState => ({
+            ballsArr: [...prevState.ballsArr, 1],
+        }));
+
+        console.log(this.state.ballsArr);
+    }
+
+    decreaseBalls = () => {
+        console.log('decreace');
+        if (this.state.ballsArr.length > 1) {
+            //this.decreaseBtn += 1;
+            console.log('DECREASE BALL');
+
+            const newArr = this.state.ballsArr.slice(0, -1);
+
+            this.setState(prevState => ({
+                ballsArr: newArr,
+            }));
+            console.log(this.state.ballsArr);
         }
     }
 
@@ -456,7 +606,6 @@ export default class Game extends PureComponent {
 
             this.playMusic();
 
-
             clearInterval(this.interval);
 
         } else {
@@ -471,15 +620,13 @@ export default class Game extends PureComponent {
         }
     }
 
-    startGame = (e) => {
+    startGame = () => {
 
-        this.cigaretteSong.volume = 0.2;
-        this.cigaretteSong.loop = true;
+        this.greeting.style.display = 'none';
 
+        this.song.volume = 0.2;
+        this.song.loop = true;
 
-
-        console.log(e.target);
-        e.target.style.display = 'none';
         this.interval = setInterval(() => this.tick(), 1000);
 
         this.setState(prevState => ({
@@ -488,69 +635,25 @@ export default class Game extends PureComponent {
                 show: true,
             },
         }));
-
-        console.log(this.state);
-
-        document.addEventListener('keydown', (e) => {
-
-            console.log(e.keyCode);
-
-            if (e.keyCode === 87 || e.keyCode === 38) {
-                this.increaseSpeed();
-            }
-
-            if (e.keyCode === 83 || e.keyCode === 40) {
-                this.decreaseSpeed();
-            }
-
-        }, false);
     }
 
     cancelAnimation = () => {
 
         window.cancelAnimationFrame(this.requestframeref);
         console.log('CANCELLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL FUNC');
-
-        // console.log(this.requestframeref);
-        // if (this.requestframeref) {
-        //     //console.log('CANCELLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL FUNC');
-        //     //console.log(window.cancelAnimationFrame(this.requestframeref));
-        //
-        //     console.log('I\'m deleting id: ', this.requestframeref);
-        //     window.cancelAnimationFrame(this.requestframeref);
-        //     this.canceledRequests += 1;
-        // }
-    }
-
-    pauseMusic = () => {
-
-    }
-
-    playMusic = () => {
-
-        if (this.cigaretteSong.paused) {
-            this.cigaretteSong.play();
-        }else{
-            this.cigaretteSong.pause();
-        }
     }
 
 
     render() {
         const {
             paddle,
-            ball,
         } = this.gameParams;
 
         console.log('render');
-        // console.log(this.gameParams.brickNodes);
-        // console.log(this.gameParams);
-        // console.log(this.state);
-        // console.log(bricks);
 
         const ballStyle = {
-            width: ball.diam,
-            height: ball.diam,
+            width: this.ballParams.diam,
+            height: this.ballParams.diam,
         };
 
         const paddleStyle = {
@@ -560,57 +663,125 @@ export default class Game extends PureComponent {
 
         return (
             <div className="game-container">
-                {!this.state.showField &&
-                    <button onClick={this.startGame}>
-                        play
-                    </button>
-                }
 
-                {this.state.countdown.show &&
-                    <div style={{color: 'white'}}>
-                        {this.state.countdown.sec}
-                    </div>
-                }
-                <button style={{cursor: 'pointer'}} onClick={this.cancelAnimation}>cancel animation</button>
-                <button style={{cursor: 'pointer'}} onClick={this.playMusic}>mute</button>
-                {
-                    this.state.showField &&
-                    //1 &&
-                    <div
-                        ref={(field) => {
-                            if (field) {
-                                this.gameParams.brickNodes = field.children;
-                                this.gameParams.fieldNode = field;
-                            }
-                        }}
-                        id="field"
-                    >
+                {this.state.showField &&
+                    <div className="navbar">
 
-                        {bricks.map((row, i) => {
-                            return row.map((col, k) => {
-                                //console.log(col);
-                                return (
-                                    <div key={i+k} brickrow={`${i}`} brickcol={`${k}`} className={`${col === 0 ? 'cell': 'brick'}`}/>
-                                );
-                            });
+                        <div className="navbar-item speed-block">
+                            <span className="label">speed &nbsp;&nbsp;</span>
+                            <button className="button" onClick={this.decreaseSpeed}>
+                                <i className="fa fa-caret-down" />
+                            </button>
 
+                            <span className="speedboard">
+                                &nbsp;&nbsp;{this.state.ballSpeed / 100}&nbsp;&nbsp;
+                            </span>
 
-                        })
+                            <button className="button" onClick={this.increaseSpeed}>
+                                <i className="fa fa-caret-up" />
+                            </button>
+                            <span>&nbsp;&nbsp;( cig / hour )&nbsp;</span>
+                        </div>
 
-                        }
+                        <div className="navbar-item balls-block">
+                            <span className="label">balls </span>
+                            <button className="button" onClick={this.decreaseBalls}>
+                                <i className="fa fa-caret-down" />
+                            </button>
 
-                        <div ref={(paddle) => {this.gameParams.paddleNode = paddle}} style={paddleStyle} id="paddle" />
-                        <div ref={(ball) => {this.gameParams.ballNode = ball}} style={ballStyle} id="ball" />
-                        <div ref={(livesNode) => {this.gameParams.livesNode = livesNode}} id="livesNode">3</div>
-                        <div ref={(scoreNode) => {this.gameParams.scoreNode = scoreNode}} id="scoreNode">0</div>
-                        <div style={{color: 'white'}} id="scoreNode">
-                            {this.state.ballSpeed}
+                            <span className="speedboard">
+                                &nbsp;&nbsp;{this.state.ballsArr.length}&nbsp;&nbsp;
+                            </span>
+
+                            <button className="button" onClick={this.increaseBalls}>
+                                <i className="fa fa-caret-up" />
+                            </button>
+                            <span>&nbsp;&nbsp;( nicotine, % )&nbsp;</span>
+
+                        </div>
+
+                        <div className="navbar-item">
+                            <button
+                                ref={(m) => {this.mute = m}}
+                                className="button mute"
+                                onClick={this.playMusic}
+                            >
+                            </button>
                         </div>
 
                     </div>
                 }
-                <audio ref={(elem) => {this.cigaretteSong = elem}} id="justAcigarette">
+
+                {!this.state.showField &&
+                    <div ref={(g) => {this.greeting = g}} className="greeting">
+                        Press "space" to play
+                    </div>
+                }
+
+                {this.state.countdown.show &&
+                    <div className="countdown">
+                        {this.state.countdown.sec}
+                    </div>
+                }
+
+                {this.state.showField &&
+                    <div className="field-wrap">
+                        <div
+                            ref={(field) => {
+                                if (field) {
+                                    this.gameParams.brickNodes = field.children;
+                                    this.gameParams.fieldNode = field;
+                                }
+                            }}
+                            id="field"
+                        >
+
+                            {bricks.map((row, i) => {
+                                return row.map((col, k) => {
+                                    //console.log(col);
+                                    return (
+                                        <div key={i+k} brickrow={`${i}`} brickcol={`${k}`} className={`${col === 0 ? 'cell': 'brick'}`}/>
+                                    );
+                                });
+
+                            })
+
+                            }
+                            /*--------------------------------------------------------
+                                balls
+                            ----------------------------------------------------------*/
+                            {!this.state.winning && this.state.ballsArr.map((b, i) => {
+                                return(
+                                    <div
+                                        key={`key${i+1}`}
+                                        ref={(ball) => {this.gameParams.ballNodes[i] = ball}}
+                                        ballkey={i}
+                                        style={ballStyle}
+                                        id="ball"
+                                    />
+                                );
+                            })
+
+                            }
+
+                            <div ref={(paddle) => {this.gameParams.paddleNode = paddle}} style={paddleStyle} id="paddle" />
+
+                            {this.state.winning &&
+                                <Fragment>
+                                    <video ref={this.playWinningVideo} className="win-video">
+                                        <source src="media/lazy_dance.mp4" type="video/mp4" />
+                                    </video>
+
+                                </Fragment>
+                            }
+                        </div>
+                    </div>
+                }
+                <audio ref={(elem) => {this.song = elem}} id="justAcigarette">
                     <source src="media/princess-chelsea-the-cigarette-duet.mp3" type="audio/mpeg"/>
+                </audio>
+                <audio ref={(elem) => {this.winningSong = elem}} id="winMusic">
+                    <source src="media/win_music.mp3" type="audio/mpeg"/>
                 </audio>
 
             </div>

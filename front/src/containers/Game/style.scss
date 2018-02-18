@@ -1,3 +1,5 @@
+@import '../../app/css/color-palette';
+
 * {
   box-sizing: border-box;
 }
@@ -11,6 +13,7 @@ body {
   margin: 0;
   width: 100%;
   height: 100%;
+  cursor: none;
 
   //padding: 10px;
   //padding-left: 300px;
@@ -24,12 +27,111 @@ canvas {
   z-index: -1;
 }
 
+button {
+  cursor: pointer;
+}
+
 .wrapper {
-  //display: grid;
+  display: grid;
+  height: 100vh;
 }
 
 .game-container {
-  padding-top: 30px;
+  //padding-top: 80px;
+  display: grid;
+}
+
+.greeting,
+.countdown {
+  color: white;
+  justify-self: center;
+  align-self: center;
+}
+
+.countdown {
+  //position: absolute;
+  //right: 0;
+}
+
+.field-wrap {
+  padding-top: 80px;
+}
+
+.navbar {
+  color: $porcelain;
+  position: absolute;
+  cursor: initial;
+  //left: 0;
+  //top: 0;
+  //width: 200px;
+  top: 0;
+  width: 100%;
+  padding: 10px;
+  //border-bottom: 1px solid #932c2c;
+  //background-color: rgba(0, 17, 54, 0.3);
+  //border-right: 1px solid rgba(0, 8, 26, 1);
+  //opacity: 0.1;
+
+  .navbar-item {
+    padding: 5px 10px 5px 10px;
+    margin: 0 10px 0 0;
+    display: inline-block;
+    border: 1px solid #2c457a;
+  }
+
+  .button {
+    background-color: rgba(83, 145, 241, 0.49);
+    border: none;
+    color: white;
+    padding: 5px 10px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 20px;
+    cursor: pointer;
+    width: 50px;
+
+    &:focus {
+      outline: none;
+    }
+  }
+
+  .button.mute {
+    width: 100px;
+
+    &:before {
+
+      font-family: FontAwesome;
+      font-style: normal;
+      font-weight: normal;
+      text-decoration: inherit;
+    }
+
+    &.on:before {
+      content: "\f028";
+    }
+
+    &:before {
+      content: "\f026";
+    }
+  }
+}
+
+.speed-block {
+  //.label {
+  //  color: $porcelain;
+  //}
+}
+
+.win-video {
+  width: 100%;
+  position: absolute;
+  left: 0;
+  bottom: 25%;
+}
+
+.speedboard {
+  color: $porcelain;
 }
 
 #field {
@@ -37,9 +139,10 @@ canvas {
   width: 700px;
   height: 700px;
   //padding-top: 30px;
-  outline: 1px solid red;
+  outline: 1px solid #932c2c;
   font-size: 0;
   position: relative;
+  //cursor: none;
 }
 
 .brick,
@@ -52,8 +155,8 @@ canvas {
 }
 
 .brick, .cell {
-  background-color: white;
-  border-color: #777 #777 #000 #000;
+  background-color: $porcelain;
+  //border-color: #777 #777 #000 #000;
   //border-radius: 3px;
 }
 
@@ -61,7 +164,7 @@ canvas {
 .brick.removed,
 .cell {
   background-color: transparent;
-  border:none;
+  border: none;
 }
 
 #paddle {
@@ -109,30 +212,21 @@ canvas {
   position: absolute;
 }
 
-#lifesNode,
-#scoreNode {
-  position: absolute;
-  right: -85px;
-  font: 14px arial, helvetica, sans-serif;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  padding: 1px 0;
-  width: 75px;
-  text-align: center;
-}
 
-#lifesNode {
-  top: 20px;
-}
 
-#lifesNode:before {
-  content: 'lifes: ';
-}
 
-#scoreNode {
-  top: 50px;
-}
-
-#scoreNode:before {
-  content: 'score: ';
-}
+//#lifesNode {
+//  top: 20px;
+//}
+//
+//#lifesNode:before {
+//  content: 'lifes: ';
+//}
+//
+//#scoreNode {
+//  top: 50px;
+//}
+//
+//#scoreNode:before {
+//  content: 'score: ';
+//}
