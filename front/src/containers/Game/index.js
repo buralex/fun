@@ -12,7 +12,8 @@ export default class Game extends PureComponent {
         super(props);
 
         this.state = {
-            ballSpeed: 700,
+            ballsCount: 2,
+            ballSpeed: 300,
             showField: false,
             countdown: {
                 sec: 3,
@@ -21,6 +22,9 @@ export default class Game extends PureComponent {
         };
 
         this.brokenBricks = 0;
+        this.animations = 0;
+        this.canceledRequests = 0;
+        this.decreaseBtn = 0;
 
         this.gameParams = {
             width: 700,
@@ -83,7 +87,15 @@ export default class Game extends PureComponent {
         console.log('update');
         if (this.gameParams.fieldNode) {
 
-            window.cancelAnimationFrame(this.requestframeref);
+            console.log(this.requestframeref);
+            console.log(window);
+
+            console.log('CCCCCCCCFFFFFRRRRRROOOOOOMMMMUUUUUPPPPPDDAATTTEEE');
+
+            //window.cancelAnimationFrame(this.requestframeref);
+
+            this.cancelAnimation();
+
 
             const gp = this.gameParams;
 
@@ -104,17 +116,6 @@ export default class Game extends PureComponent {
     }
 
     initParams = ({width, height, paddle, ball, paddingBottom, paddleNode, ballNode}) => {
-
-
-
-        this.cigaretteSong.volume = 0.2;
-        this.cigaretteSong.loop = true;
-        this.cigaretteSong.play();
-
-        var x = document.getElementById("justAcigarette");
-
-        console.log(this.cigaretteSong);
-        console.log(x);
 
         // count visible bricks
         let counts = {};
@@ -254,134 +255,161 @@ export default class Game extends PureComponent {
     }
 
 
+    calcMovementAndCollisions = () => {
+        // Move the ball
+        ball.x += dt * this.state.ballSpeed * Math.cos(ball.theta);
+        ball.y += dt * this.state.ballSpeed * Math.sin(ball.theta);
 
-    draw = ({ width, height, brickNodes, ball, ballNode, paddle, paddleNode, lives, dt }) => {
+        // forbid a ball to go beyond
+        if (ball.x < 0) { ball.x = 0; }
+        if (ball.y < 0) { ball.y = 0; }
+        if ((ball.x + ball.diam) > width) { ball.x = width - ball.diam; }
+        if ((ball.y + ball.diam) > height) { ball.y = height - ball.diam; }
+
+
+
+        // Check for collisions with the bounds
+        if (ball.x <= 0) {
+            this.reflectBallFromLeft(ball);
+        }
+
+        if (ball.x >= width - ball.diam) {
+            this.reflectBallFromRight(ball);
+        }
+
+        if (ball.y <= 0) {
+            //game.sounds.playSound('pong');
+            this.reflectBallFromTop(ball);
+        }
+
+        // Check for collisions with the bottom
+        if (ball.y >= height - ball.diam) {
+            //this.looseLife();
+            this.reflectBallFromBottom(ball);
+        }
+
+
+        // check for collisions with the paddle
+        const brickWidth = brickNodes[0].offsetWidth;
+        const brickHeight = brickNodes[0].offsetHeight;
+
+        let correctionDims = ball.radius;
+
+        if (this.state.ballSpeed > 300 && this.state.ballSpeed <= 400) {
+            correctionDims = ball.radius + (ball.radius / 2);
+        } else if (this.state.ballSpeed > 500) {
+            correctionDims = ball.diam;
+        }
+
+        // console.log(correctionDims);
+        // console.log(this.state.ballSpeed);
+
+        let paddleCollision = this.rectangleIntersect(
+            paddle.x + (paddle.width / 2), paddle.y + (paddle.height / 2), paddle.width, paddle.height,
+            ball.x + ball.radius, ball.y + correctionDims, ball.diam, ball.diam
+        );
+
+        if (paddleCollision) {
+            if (this.isBallReflectingFromPaddle) {
+                // we have a collision but ball is already reflecting from the paddle so ignore it
+            } else {
+                console.log('collision ball Y: ',ball.y);
+                //.sounds.playSound('pong');
+                this.isBallReflectingFromPaddle = true;
+                this.reflectBallFromPaddle(ball, paddle);
+            }
+        } else {
+            this.isBallReflectingFromPaddle = false;
+        }
+
+
+        // on which row the ball is located (begining from 0)
+        const row = Math.ceil((parseInt(ball.y) + ball.radius) / brickHeight) - 1;
+
+        // on which col the ball is located (begining from 0)
+        const col = Math.ceil((parseInt(ball.x) + ball.radius) / brickWidth) - 1;
+
+        let cell = brickNodes[row * (width / brickWidth) + col];
+
+        if (cell && cell.classList.contains('brick') && !cell.classList.contains('removed')) {
+
+            this.brokenBricks += 1;
+
+            cell.classList.add('removed');
+
+            const cellPart = this.getRectPart(cell, ball.x + ball.radius, ball.y + ball.radius);
+
+            if (cellPart === 0) {
+                this.reflectBallFromBottom(ball);
+            }
+
+            if (cellPart === 1) {
+                this.reflectBallFromLeft(ball);
+            }
+
+            if (cellPart === 2) {
+                this.reflectBallFromTop(ball);
+            }
+
+            if (cellPart === 3) {
+                this.reflectBallFromRight(ball);
+            }
+        }
+
+        /*---------------------------------------------------------------------
+                end ball movement
+        * -------------------------------------------------------------------*/
+    }
+
+
+    draw = ({ width, height, brickNodes, balls, ballNode, paddle, paddleNode, lives, dt }) => {
+
+        console.log('animations: ',this.animations);
+        console.log('decreqaseBtn: ',this.decreaseBtn);
+        console.log('canceled: ',this.canceledRequests);
 
         const frame = (time) => {
             /*---------------------------------------------------------------------
                     ball movement
             * -------------------------------------------------------------------*/
 
-            console.log(this.state.ballSpeed);
+            // console.log(this.state.ballSpeed);
+            // console.log('delta X:',dt * this.state.ballSpeed * Math.cos(ball.theta));
+            // console.log('delta Y:',dt * this.state.ballSpeed * Math.sin(ball.theta));
 
-            // Move the ball
-            ball.x += dt * this.state.ballSpeed * Math.cos(ball.theta);
-            ball.y += dt * this.state.ballSpeed * Math.sin(ball.theta);
+            this.balls.forEach((ball) => {
 
-            // forbid a ball to go beyond
-            if (ball.x < 0) { ball.x = 0; }
-            if (ball.y < 0) { ball.y = 0; }
-            if ((ball.x + ball.diam) > width) { ball.x = width - ball.diam; }
-            if ((ball.y + ball.diam) > height) { ball.y = height - ball.diam; }
+            });
+
 
             ballNode.style.left = `${ball.x}px`;
             ballNode.style.top = `${ball.y}px`;
 
-            // Check for collisions with the bounds
-            if (ball.x <= 0) {
-                this.reflectBallFromLeft(ball);
-            }
-
-            if (ball.x >= width - ball.diam) {
-                this.reflectBallFromRight(ball);
-            }
-
-            if (ball.y <= 0) {
-                //game.sounds.playSound('pong');
-                this.reflectBallFromTop(ball);
-            }
-
-            // Check for collisions with the bottom
-            if (ball.y >= height - ball.diam) {
-                //this.looseLife();
-                this.reflectBallFromBottom(ball);
-            }
-
-
-            // check for collisions with the paddle
-            const brickWidth = brickNodes[0].offsetWidth;
-            const brickHeight = brickNodes[0].offsetHeight;
-
-            let correctionDims = ball.radius;
-
-            if (this.state.ballSpeed > 300 && this.state.ballSpeed <= 400) {
-                correctionDims = ball.radius + (ball.radius / 2);
-            } else if (this.state.ballSpeed > 500) {
-                correctionDims = ball.diam;
-            }
-
-            // console.log(correctionDims);
-            // console.log(this.state.ballSpeed);
-
-            let paddleCollision = this.rectangleIntersect(
-                paddle.x + (paddle.width / 2), paddle.y + (paddle.height / 2), paddle.width, paddle.height,
-                ball.x + ball.radius, ball.y + correctionDims, ball.diam, ball.diam
-            );
-
-            if (paddleCollision) {
-                if (this.isBallReflectingFromPaddle) {
-                    // we have a collision but ball is already reflecting from the paddle so ignore it
-                } else {
-                    console.log('collision ball Y: ',ball.y);
-                    //.sounds.playSound('pong');
-                    this.isBallReflectingFromPaddle = true;
-                    this.reflectBallFromPaddle(ball, paddle);
-                }
-            } else {
-                this.isBallReflectingFromPaddle = false;
-            }
-
-
-            // on which row the ball is located (begining from 0)
-            const row = Math.ceil((parseInt(ball.y) + ball.radius) / brickHeight) - 1;
-
-            // on which col the ball is located (begining from 0)
-            const col = Math.ceil((parseInt(ball.x) + ball.radius) / brickWidth) - 1;
-
-            let cell = brickNodes[row * (width / brickWidth) + col];
-
-            if (cell && cell.classList.contains('brick') && !cell.classList.contains('removed')) {
-
-                this.brokenBricks += 1;
-
-                cell.classList.add('removed');
-
-                const cellPart = this.getRectPart(cell, ball.x + ball.radius, ball.y + ball.radius);
-
-                if (cellPart === 0) {
-                    this.reflectBallFromBottom(ball);
-                }
-
-                if (cellPart === 1) {
-                    this.reflectBallFromLeft(ball);
-                }
-
-                if (cellPart === 2) {
-                    this.reflectBallFromTop(ball);
-                }
-
-                if (cellPart === 3) {
-                    this.reflectBallFromRight(ball);
-                }
-            }
-            /*-----------------------------------------------------
-                end check for collisions with the paddle
-            * --------------------------------------------------*/
-
-
-            /*---------------------------------------------------------------------
-                    end ball movement
-            * -------------------------------------------------------------------*/
             if (this.brokenBricks < this.visibleBricksCount) {
                 this.requestframeref = window.requestAnimationFrame(frame);
+
+                console.log('last id: ', this.requestframeref);
+
             } else {
-                console.log('WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW');
-                window.cancelAnimationFrame(this.requestframeref);
+                console.log('WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWiiiiiiiiiinnnnnnnnnnnn');
+                //window.cancelAnimationFrame(this.requestframeref);
+                this.cancelAnimation();
                 this.winTheGame();
             }
         }
 
+        // if (!this.requestframeref) {
+        //
+        // }
+
+        //this.cancelAnimation();
+        console.log(this.requestframeref);
+        //debugger
+        //calls only once after update
         window.requestAnimationFrame(frame);
+        //this.requestframeref = window.requestAnimationFrame(frame);
+        this.animations += 1;
+
     }
 
     winTheGame = () => {
@@ -391,7 +419,11 @@ export default class Game extends PureComponent {
 
     increaseSpeed = () => {
 
-        if (this.state.ballSpeed < 700) {
+        if (this.state.ballSpeed < 600) {
+            console.log('INCREASE');
+
+            //this.cancelAnimation();
+
             this.setState(prevState => ({
                 ballSpeed: prevState.ballSpeed + 100,
             }));
@@ -401,6 +433,10 @@ export default class Game extends PureComponent {
     decreaseSpeed = () => {
         console.log('decreace');
         if (this.state.ballSpeed > 100) {
+            this.decreaseBtn += 1;
+
+            //this.cancelAnimation();
+
             this.setState(prevState => ({
                 ballSpeed: prevState.ballSpeed - 100,
             }));
@@ -418,6 +454,8 @@ export default class Game extends PureComponent {
                 },
             }));
 
+            this.playMusic();
+
 
             clearInterval(this.interval);
 
@@ -434,6 +472,12 @@ export default class Game extends PureComponent {
     }
 
     startGame = (e) => {
+
+        this.cigaretteSong.volume = 0.2;
+        this.cigaretteSong.loop = true;
+
+
+
         console.log(e.target);
         e.target.style.display = 'none';
         this.interval = setInterval(() => this.tick(), 1000);
@@ -462,6 +506,35 @@ export default class Game extends PureComponent {
         }, false);
     }
 
+    cancelAnimation = () => {
+
+        window.cancelAnimationFrame(this.requestframeref);
+        console.log('CANCELLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL FUNC');
+
+        // console.log(this.requestframeref);
+        // if (this.requestframeref) {
+        //     //console.log('CANCELLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL FUNC');
+        //     //console.log(window.cancelAnimationFrame(this.requestframeref));
+        //
+        //     console.log('I\'m deleting id: ', this.requestframeref);
+        //     window.cancelAnimationFrame(this.requestframeref);
+        //     this.canceledRequests += 1;
+        // }
+    }
+
+    pauseMusic = () => {
+
+    }
+
+    playMusic = () => {
+
+        if (this.cigaretteSong.paused) {
+            this.cigaretteSong.play();
+        }else{
+            this.cigaretteSong.pause();
+        }
+    }
+
 
     render() {
         const {
@@ -470,10 +543,10 @@ export default class Game extends PureComponent {
         } = this.gameParams;
 
         console.log('render');
-        console.log(this.gameParams.brickNodes);
-        console.log(this.gameParams);
-        console.log(this.state);
-        console.log(bricks);
+        // console.log(this.gameParams.brickNodes);
+        // console.log(this.gameParams);
+        // console.log(this.state);
+        // console.log(bricks);
 
         const ballStyle = {
             width: ball.diam,
@@ -498,7 +571,8 @@ export default class Game extends PureComponent {
                         {this.state.countdown.sec}
                     </div>
                 }
-
+                <button style={{cursor: 'pointer'}} onClick={this.cancelAnimation}>cancel animation</button>
+                <button style={{cursor: 'pointer'}} onClick={this.playMusic}>mute</button>
                 {
                     this.state.showField &&
                     //1 &&
@@ -532,6 +606,7 @@ export default class Game extends PureComponent {
                         <div style={{color: 'white'}} id="scoreNode">
                             {this.state.ballSpeed}
                         </div>
+
                     </div>
                 }
                 <audio ref={(elem) => {this.cigaretteSong = elem}} id="justAcigarette">

@@ -14,17 +14,6 @@ export default class NightSky extends PureComponent {
             ballSpeed: 300,
             needsRefresh: false,
         };
-
-
-        window.requestAnimationFrame = window.requestAnimationFrame
-            || window.mozRequestAnimationFrame
-            || window.webkitRequestAnimationFrame
-            || window.msRequestAnimationFrame
-            || function(f){return setTimeout(f, 1000/60)};
-
-        window.cancelAnimationFrame = window.cancelAnimationFrame
-            || window.mozCancelAnimationFrame
-            || function(requestID){clearTimeout(requestID)} //fall back
     }
 
     componentDidMount() {
@@ -36,13 +25,6 @@ export default class NightSky extends PureComponent {
     }
 
     skyLogic = () => {
-        (function() {
-            const requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame ||
-                window.webkitRequestAnimationFrame || window.msRequestAnimationFrame || function( callback ){
-                    window.setTimeout(callback, 1000 / 60);
-                };
-            window.requestAnimationFrame = requestAnimationFrame;
-        })();
 
         const background = document.getElementById("bgCanvas");
         const bgCtx = background.getContext("2d");
