@@ -14,10 +14,7 @@ body {
   width: 100%;
   height: 100%;
   cursor: none;
-
-  //padding: 10px;
-  //padding-left: 300px;
-  //cursor: none !important;
+  font-family: sans-serif;
 }
 
 canvas {
@@ -37,7 +34,6 @@ button {
 }
 
 .game-container {
-  //padding-top: 80px;
   display: grid;
 }
 
@@ -46,11 +42,12 @@ button {
   color: white;
   justify-self: center;
   align-self: center;
+  font-size: 32px;
+  font-weight: 400;
 }
 
 .countdown {
-  //position: absolute;
-  //right: 0;
+
 }
 
 .field-wrap {
@@ -61,16 +58,9 @@ button {
   color: $porcelain;
   position: absolute;
   cursor: initial;
-  //left: 0;
-  //top: 0;
-  //width: 200px;
   top: 0;
   width: 100%;
   padding: 10px;
-  //border-bottom: 1px solid #932c2c;
-  //background-color: rgba(0, 17, 54, 0.3);
-  //border-right: 1px solid rgba(0, 8, 26, 1);
-  //opacity: 0.1;
 
   .navbar-item {
     padding: 5px 10px 5px 10px;
@@ -118,9 +108,7 @@ button {
 }
 
 .speed-block {
-  //.label {
-  //  color: $porcelain;
-  //}
+
 }
 
 .win-video {
@@ -128,6 +116,12 @@ button {
   position: absolute;
   left: 0;
   bottom: 25%;
+}
+
+.win-head {
+  text-align: center;
+  margin-top: 10px;
+  color: $porcelain;
 }
 
 .speedboard {
@@ -138,26 +132,22 @@ button {
   margin: 0 auto 0 auto;
   width: 700px;
   height: 700px;
-  //padding-top: 30px;
   outline: 1px solid #932c2c;
   font-size: 0;
   position: relative;
-  //cursor: none;
+
 }
 
 .brick,
 .cell {
   width: 14px;
   height: 14px;
-  //margin: 1px;
   display: inline-block;
   border: 1px solid black;
 }
 
 .brick, .cell {
   background-color: $porcelain;
-  //border-color: #777 #777 #000 #000;
-  //border-radius: 3px;
 }
 
 
@@ -169,13 +159,10 @@ button {
 
 #paddle {
   border: 1px solid #777;
-  //background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #cdd), color-stop(100%, #777));
-  //background: -webkit-linear-gradient(top,  #cdd 0%, #777 100%);
-  //background: linear-gradient(to bottom,  #cdd 0%, #777 100%);
+  background: $porcelain;
+  background: linear-gradient($tower-gray, $snow-drift, $tower-gray);
+
   position: absolute;
-  //left: 128px;
-  //top: 470px;
-  //border-radius: 3px;
 
   &:after {
     content: '';
@@ -184,6 +171,7 @@ button {
     height: 100%;
     margin-left: auto;
     background-color: #c19a6b;
+    background: linear-gradient(#a46d2c, #c19a6b, #a46d2c);
   }
 }
 
@@ -204,29 +192,12 @@ button {
 -----------------------------------------------------------------------*/
 
 #ball {
-  border: 1px solid #955;
-  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #fdd), color-stop(100%, #500));
-  background: -webkit-linear-gradient(top,  #fdd 0%, #500 100%);
-  background: linear-gradient(to bottom,  #fdd 0%, #500 100%);
+  border: 1px solid #932c2c;
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #fdd), color-stop(100%, #932c2c));
+  background: -webkit-linear-gradient(top,  #fdd 0%, #932c2c 100%);
+  background: linear-gradient(to bottom,  #fdd 0%, #932c2c 100%);
+  background: linear-gradient(to bottom,  #fdd 0%, #932c2c 100%);
+
   border-radius: 50%;
   position: absolute;
 }
-
-
-
-
-//#lifesNode {
-//  top: 20px;
-//}
-//
-//#lifesNode:before {
-//  content: 'lifes: ';
-//}
-//
-//#scoreNode {
-//  top: 50px;
-//}
-//
-//#scoreNode:before {
-//  content: 'score: ';
-//}
