@@ -30,14 +30,14 @@ button {
 
 .greeting,
 .countdown {
-  color: white;
+  color: #ECEFF1;
   justify-self: center;
   align-self: center;
   font-size: 32px;
   font-weight: 400; }
 
 .field-wrap {
-  padding-top: 80px; }
+  padding-top: 70px; }
 
 .navbar {
   color: #ECEFF1;
@@ -61,7 +61,7 @@ button {
     display: inline-block;
     font-size: 20px;
     cursor: pointer;
-    width: 50px; }
+    min-width: 50px; }
     .navbar .button:focus {
       outline: none; }
   .navbar .button.mute {
@@ -85,23 +85,25 @@ button {
 .win-head {
   text-align: center;
   margin-top: 10px;
-  color: #ECEFF1; }
+  color: #ECEFF1;
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  text-align: center; }
+  .win-head h3 {
+    font-weight: 100; }
 
 .speedboard {
   color: #ECEFF1; }
 
 #field {
   margin: 0 auto 0 auto;
-  width: 700px;
-  height: 700px;
   outline: 1px solid #932c2c;
   font-size: 0;
   position: relative; }
 
 .brick,
 .cell {
-  width: 14px;
-  height: 14px;
   display: inline-block;
   border: 1px solid black; }
 
@@ -114,7 +116,6 @@ button {
   border: none; }
 
 #paddle {
-  border: 1px solid #777;
   background: #ECEFF1;
   background: linear-gradient(#B0BEC5, #F7F9F9, #B0BEC5);
   position: absolute; }

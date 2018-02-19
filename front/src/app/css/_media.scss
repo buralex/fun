@@ -1,0 +1,191 @@
+
+/*----------------------------------------------------------------------------------
+
+                             DESKTOP FIRST
+
+-----------------------------------------------------------------------------------*/
+
+/* Small Devices, Tablets */
+@media only screen and (max-height : 750px) {
+
+  div.field-wrap {
+    padding-top: 50px;
+  }
+
+  div.navbar {
+    color: $porcelain;
+    position: absolute;
+    cursor: initial;
+    top: 0;
+    width: 100%;
+    padding: 10px;
+
+    .navbar-item {
+      padding: 5px 10px 5px 10px;
+      margin: 0 10px 0 0;
+      display: inline-block;
+      border: 1px solid #2c457a;
+    }
+
+    .button {
+      background-color: rgba(83, 145, 241, 0.49);
+      border: none;
+      color: $porcelain;
+      padding: 0 10px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 15px;
+      cursor: pointer;
+      min-width: 50px;
+
+      &:focus {
+        outline: none;
+      }
+    }
+
+    .button.mute {
+      width: 100px;
+
+      &:before {
+
+        font-family: FontAwesome;
+        font-style: normal;
+        font-weight: normal;
+        text-decoration: inherit;
+      }
+
+      &.on:before {
+        content: "\f028";
+      }
+
+      &:before {
+        content: "\f026";
+      }
+    }
+  }
+}
+
+
+
+/* Large Devices, Wide Screens */
+@media only screen and (max-width : 1300px) {
+
+}
+
+/* Large Devices, Wide Screens */
+@media only screen and (max-width : 1200px) {
+
+}
+
+
+/* Medium Devices, Desktops */
+@media only screen and (max-width : 992px) {
+
+}
+
+
+/* Small Devices, Tablets */
+@media only screen and (max-width : 768px) {
+
+  div.navbar {
+    color: $porcelain;
+    position: absolute;
+    cursor: initial;
+    top: 0;
+    width: 100%;
+    padding: 10px;
+
+    .navbar-item {
+      padding: 5px 10px 5px 10px;
+      margin: 0 10px 0 0;
+      display: inline-block;
+      border: 1px solid #2c457a;
+    }
+
+    .button {
+      background-color: rgba(83, 145, 241, 0.49);
+      border: none;
+      color: $porcelain;
+      padding: 0 10px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 15px;
+      cursor: pointer;
+      min-width: 50px;
+
+      &:focus {
+        outline: none;
+      }
+    }
+
+    .button.mute {
+      width: 100px;
+
+      &:before {
+
+        font-family: FontAwesome;
+        font-style: normal;
+        font-weight: normal;
+        text-decoration: inherit;
+      }
+
+      &.on:before {
+        content: "\f028";
+      }
+
+      &:before {
+        content: "\f026";
+      }
+    }
+  }
+}
+
+
+/* Extra Small Devices, Phones */
+@media only screen and (max-width : 480px) {
+
+}
+
+
+/* Custom, iPhone Retina */
+@media only screen and (max-width : 320px) {
+
+}
+
+
+/*----------------------------------------------------------------------------------
+
+                             MOBILE FIRST
+
+-----------------------------------------------------------------------------------*/
+
+/* Custom, iPhone Retina */
+@media only screen and (min-width : 320px){
+  /**/
+}
+
+
+/* Extra Small Devices, Phones */
+@media only screen and (min-width : 480px){
+  /**/
+}
+
+
+/* Small Devices, Tablets */
+@media only screen and (min-width : 768px){
+  /**/
+}
+
+
+/* Medium Devices, Desktops */
+@media only screen and (min-width : 992px){
+
+}
+
+
+/* Large Devices, Wide Screens */
+@media only screen and (min-width : 1200px){
+  /**/
+}

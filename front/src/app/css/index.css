@@ -1,0 +1,110 @@
+/*------------------------------------ MEDIA ------------------*/
+/*----------------------------------------------------------------------------------
+
+                             DESKTOP FIRST
+
+-----------------------------------------------------------------------------------*/
+/* Small Devices, Tablets */
+@media only screen and (max-height: 750px) {
+  div.field-wrap {
+    padding-top: 50px; }
+
+  div.navbar {
+    color: #ECEFF1;
+    position: absolute;
+    cursor: initial;
+    top: 0;
+    width: 100%;
+    padding: 10px; }
+    div.navbar .navbar-item {
+      padding: 5px 10px 5px 10px;
+      margin: 0 10px 0 0;
+      display: inline-block;
+      border: 1px solid #2c457a; }
+    div.navbar .button {
+      background-color: rgba(83, 145, 241, 0.49);
+      border: none;
+      color: #ECEFF1;
+      padding: 0 10px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 15px;
+      cursor: pointer;
+      min-width: 50px; }
+      div.navbar .button:focus {
+        outline: none; }
+    div.navbar .button.mute {
+      width: 100px; }
+      div.navbar .button.mute:before {
+        font-family: FontAwesome;
+        font-style: normal;
+        font-weight: normal;
+        text-decoration: inherit; }
+      div.navbar .button.mute.on:before {
+        content: "\f028"; }
+      div.navbar .button.mute:before {
+        content: "\f026"; } }
+/* Large Devices, Wide Screens */
+/* Large Devices, Wide Screens */
+/* Medium Devices, Desktops */
+/* Small Devices, Tablets */
+@media only screen and (max-width: 768px) {
+  div.navbar {
+    color: #ECEFF1;
+    position: absolute;
+    cursor: initial;
+    top: 0;
+    width: 100%;
+    padding: 10px; }
+    div.navbar .navbar-item {
+      padding: 5px 10px 5px 10px;
+      margin: 0 10px 0 0;
+      display: inline-block;
+      border: 1px solid #2c457a; }
+    div.navbar .button {
+      background-color: rgba(83, 145, 241, 0.49);
+      border: none;
+      color: #ECEFF1;
+      padding: 0 10px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 15px;
+      cursor: pointer;
+      min-width: 50px; }
+      div.navbar .button:focus {
+        outline: none; }
+    div.navbar .button.mute {
+      width: 100px; }
+      div.navbar .button.mute:before {
+        font-family: FontAwesome;
+        font-style: normal;
+        font-weight: normal;
+        text-decoration: inherit; }
+      div.navbar .button.mute.on:before {
+        content: "\f028"; }
+      div.navbar .button.mute:before {
+        content: "\f026"; } }
+/* Extra Small Devices, Phones */
+/* Custom, iPhone Retina */
+/*----------------------------------------------------------------------------------
+
+                             MOBILE FIRST
+
+-----------------------------------------------------------------------------------*/
+/* Custom, iPhone Retina */
+@media only screen and (min-width: 320px) {
+  /**/ }
+/* Extra Small Devices, Phones */
+@media only screen and (min-width: 480px) {
+  /**/ }
+/* Small Devices, Tablets */
+@media only screen and (min-width: 768px) {
+  /**/ }
+/* Medium Devices, Desktops */
+/* Large Devices, Wide Screens */
+@media only screen and (min-width: 1200px) {
+  /**/ }
+
+/*# sourceMappingURL=index.css.map */

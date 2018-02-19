@@ -5,9 +5,23 @@ import debounce from "lodash/debounce";
 
 import './style.css';
 
-//import bricks from './bricks';
+import bricks from './bricks';
+import {playList} from '../../utils/data/playList';
 
-import bricks from './b1';
+//import bricks from './b1';
+
+
+// calc game height depending on screen height
+const calcHeight = (height) => {
+    let h = 700;
+
+    if (height < 600) {
+        h = 500;
+    } else if (height < 750) {
+        h = 600;
+    }
+    return h;
+};
 
 export default class Game extends PureComponent {
 
@@ -15,11 +29,13 @@ export default class Game extends PureComponent {
         super(props);
 
         this.state = {
-            // each ball it's another 1
+            // each ball it's another '1'
             ballsArr: [1],
             ballSpeed: 300,
+            resetKey: 0,
             showField: false,
             winning: false,
+            //screenHeight: props.screenDims.height,
             countdown: {
                 sec: 3,
                 show: false,
@@ -28,9 +44,13 @@ export default class Game extends PureComponent {
 
         this.brokenBricks = 0;
 
+        const fieldHeight = calcHeight(Math.max( document.documentElement.clientHeight, window.innerHeight ));
+
+        // animation mutates gameParams object, changing coordinates of the ball
         this.gameParams = {
-            width: 700,
-            height: 700,
+            // width and height are equal
+            width: fieldHeight,
+            height: fieldHeight,
             lives: 100,
             score: 0,
             paddingBottom: 30,
@@ -41,12 +61,15 @@ export default class Game extends PureComponent {
             paddle: {
                 x:0,
                 y:0,
-                width: 140,
-                height: 16,
+                width: fieldHeight / 5,
+                height: fieldHeight / 50,
                 last_x: 0,
                 speed: 300,
             },
 
+            fieldNode: null,
+            paddleNode: null,
+            brickNodes: [],
             ballNodes: [],
         }
 
@@ -68,34 +91,10 @@ export default class Game extends PureComponent {
 
         this.increaseBalls = debounce(this.increaseBalls, 100);
         this.decreaseBalls = debounce(this.decreaseBalls, 100);
-
-
-        window.requestAnimationFrame = window.requestAnimationFrame
-            || window.mozRequestAnimationFrame
-            || window.webkitRequestAnimationFrame
-            || window.msRequestAnimationFrame
-            || function(f){return setTimeout(f, 1000/60)};
-
-        window.cancelAnimationFrame = window.cancelAnimationFrame
-            || window.mozCancelAnimationFrame
-            || function(requestID){clearTimeout(requestID)} //fall back
     }
 
     componentDidMount() {
-
-        document.addEventListener('keydown', (e) => {
-
-            if (e.keyCode === 32) {
-
-                if (!this.gameStarted) {
-                    this.gameStarted = true;
-                    this.startGame();
-                }
-            }
-
-
-        }, false);
-
+        this.startGame();
     }
 
     componentDidUpdate() {
@@ -122,7 +121,7 @@ export default class Game extends PureComponent {
         return this.random((-1 / 6) * Math.PI, (-5 / 6) * Math.PI);  //from -150 to -30 degrees
     }
 
-    initParams = ({width, height, paddle, balls, paddingBottom, paddleNode, ballNodes}) => {
+    initParams = ({width, height, paddle, balls, paddingBottom, paddleNode}) => {
         /*---------------------------------------- bricks -----------------*/
         // count visible bricks
         let counts = {};
@@ -418,17 +417,6 @@ export default class Game extends PureComponent {
         window.requestAnimationFrame(frame);
     }
 
-    winTheGame = () => {
-        this.setState(prevState => ({
-            winning: true,
-        }))
-
-        this.winningSong.volume = 0.2;
-        this.winningSong.loop = true;
-        this.winningSong.play();
-        this.mute.parentNode.style.display = 'none';
-    }
-
     playWinningVideo = (vid) => {
         if (vid) {
             vid.loop = true;
@@ -437,14 +425,13 @@ export default class Game extends PureComponent {
         }
     }
 
-
     playMusic = () => {
         this.mute.classList.toggle('on');
 
-        if (this.song.paused) {
-            this.song.play();
+        if (this.audioNode.paused) {
+            this.audioNode.play();
         }else{
-            this.song.pause();
+            this.audioNode.pause();
         }
     }
 
@@ -509,10 +496,10 @@ export default class Game extends PureComponent {
 
     startGame = () => {
 
-        this.greeting.style.display = 'none';
+        //this.greeting.style.display = 'none';
 
-        this.song.volume = 0.2;
-        this.song.loop = true;
+        this.audioNode.volume = 0.2;
+        this.audioNode.loop = true;
 
         this.interval = setInterval(() => this.tick(), 1000);
 
@@ -524,14 +511,45 @@ export default class Game extends PureComponent {
         }));
     }
 
+    winTheGame = () => {
+        this.setState(prevState => ({
+            winning: true,
+        }));
+
+        this.playMusic();
+        this.audioNode.src = playList.winSong;
+        this.playMusic();
+
+        this.gameParams.fieldNode.style.outline = 'none';
+    }
+
     cancelAnimation = () => {
         window.cancelAnimationFrame(this.requestframeref);
+    }
+
+    reset = () => {
+        this.setState(prevState => ({
+            resetKey: prevState.resetKey + 1,
+            winning: false,
+        }));
     }
 
     render() {
         const {
             paddle,
+            width,
+            height,
         } = this.gameParams;
+
+        const fieldStyle = {
+            width: width,
+            height: height,
+        };
+
+        const brickStyle = {
+            width: width / bricks[0].length,
+            height: height / bricks[0].length,
+        };
 
         const ballStyle = {
             width: this.ballParams.diam,
@@ -547,7 +565,9 @@ export default class Game extends PureComponent {
             <div className="game-container">
 
                 {this.state.showField &&
+
                     <div className="navbar">
+
 
                         <div className="navbar-item speed-block">
                             <span className="label">speed &nbsp;&nbsp;</span>
@@ -591,12 +611,15 @@ export default class Game extends PureComponent {
                             </button>
                         </div>
 
-                    </div>
-                }
+                        <div className="navbar-item">
+                            <button
+                                className="button"
+                                onClick={this.props.reset}
+                            >
+                                reset
+                            </button>
+                        </div>
 
-                {!this.state.showField &&
-                    <div ref={(g) => {this.greeting = g}} className="greeting">
-                        Press "space" to play
                     </div>
                 }
 
@@ -606,13 +629,15 @@ export default class Game extends PureComponent {
                     </div>
                 }
 
+                {this.state.winning &&
+                    <div className="win-head">
+                        <h3>Well done! You've spent a few minutes without smoking :)</h3>
+                    </div>
+                }
+
                 {this.state.showField &&
                     <div className="field-wrap">
-                        {this.state.winning &&
-                        <div className="win-head">
-                            <h2>Well done!</h2>
-                        </div>
-                        }
+
                         <div
                             ref={(field) => {
                                 if (field) {
@@ -620,13 +645,24 @@ export default class Game extends PureComponent {
                                     this.gameParams.fieldNode = field;
                                 }
                             }}
+                            key={this.state.resetKey}
                             id="field"
+                            style={fieldStyle}
                         >
 
+                            /*--------------------------------------------------------
+                                bricks
+                            ----------------------------------------------------------*/
                             {bricks.map((row, i) => {
                                 return row.map((col, k) => {
                                     return (
-                                        <div key={i+k} brickrow={`${i}`} brickcol={`${k}`} className={`${col === 0 ? 'cell': 'brick'}`}/>
+                                        <div
+                                            style={brickStyle}
+                                            key={i+k}
+                                            brickrow={`${i}`}
+                                            brickcol={`${k}`}
+                                            className={`${col === 0 ? 'cell': 'brick'}`}
+                                        />
                                     );
                                 });
 
@@ -657,19 +693,16 @@ export default class Game extends PureComponent {
                                     <video ref={this.playWinningVideo} className="win-video">
                                         <source src="media/lazy_dance.mp4" type="video/mp4" />
                                     </video>
-
                                 </Fragment>
                             }
                         </div>
                     </div>
                 }
-                <audio ref={(elem) => {this.song = elem}} id="justAcigarette">
-                    <source src="media/princess-chelsea-the-cigarette-duet.mp3" type="audio/mpeg"/>
-                </audio>
-                <audio ref={(elem) => {this.winningSong = elem}} id="winMusic">
-                    <source src="media/win_music.mp3" type="audio/mpeg"/>
-                </audio>
-
+                <audio
+                    ref={(elem) => {this.audioNode = elem}}
+                    id="justAcigarette"
+                    src={playList.bgSong}
+                />
             </div>
         );
     }

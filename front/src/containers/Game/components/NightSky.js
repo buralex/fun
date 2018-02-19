@@ -1,10 +1,5 @@
 import React, { PureComponent, Fragment } from 'react';
 
-//import './style.css';
-
-// import bricks from './bricks';
-//import bricks from './b1';
-
 export default class NightSky extends PureComponent {
 
     constructor(props) {
@@ -21,21 +16,26 @@ export default class NightSky extends PureComponent {
     }
 
     componentDidUpdate() {
-        console.log('update');
+        this.skyLogic();
     }
 
     skyLogic = () => {
 
-        const background = document.getElementById("bgCanvas");
-        const bgCtx = background.getContext("2d");
-        const width = document.body.clientWidth;
-        const height = document.body.clientHeight;
+        const {
+            width,
+            height,
+        } = this.props.screenDims;
 
-        background.width = width;
-        background.height = height;
+        const bgCtx = this.bgCanvas.getContext("2d");
+
+        const scrlW = document.body.scrollHeight;
+        const scrlH = document.body.scrollHeight;
+
+        this.bgCanvas.width = scrlW > width ? scrlW : width;
+        this.bgCanvas.height = scrlH > height ? scrlH : height;
 
         // Some random points
-        var points = [],
+        let points = [],
             displacement = 140,
             power = Math.pow(2,Math.ceil(Math.log(width)/(Math.log(2))));
 
@@ -79,7 +79,7 @@ export default class NightSky extends PureComponent {
             }
         }
 
-        var entities = [];
+        let entities = [];
 
         // init the stars
         for(let i=0; i < height; i++){
@@ -106,15 +106,9 @@ export default class NightSky extends PureComponent {
 
 
     render() {
-        // const {
-        //     paddle,
-        //     ball,
-        // } = this.gameParams;
-
-
         return (
             <Fragment>
-                <canvas id="bgCanvas"/>
+                <canvas ref={(c) => {this.bgCanvas = c}} id="bgCanvas"/>
             </Fragment>
         );
     }
