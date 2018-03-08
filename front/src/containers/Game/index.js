@@ -109,6 +109,11 @@ export default class Game extends PureComponent {
             this.handlePaddleMovement(gp);
             this.draw(gp);
         }
+
+        if (this.canvas) {
+            this.ctx =this.canvas.getContext("2d");
+            console.log(this.ctx);
+        }
     }
 
     // Return a random number in between x and y
@@ -546,6 +551,13 @@ export default class Game extends PureComponent {
             height: height,
         };
 
+        const canvasStyle = {
+            width: width,
+            height: height,
+            background: 'gray',
+            zIndex: '10'
+        };
+
         const brickStyle = {
             width: width / bricks[0].length,
             height: height / bricks[0].length,
@@ -636,67 +648,76 @@ export default class Game extends PureComponent {
                 }
 
                 {this.state.showField &&
-                    <div className="field-wrap">
+                    <Fragment>
+                        <canvas
+                            style={canvasStyle}
+                            ref={(c) => {this.canvas = c}}
+                            id="fieldCanvas"
+                        />
 
-                        <div
-                            ref={(field) => {
-                                if (field) {
-                                    this.gameParams.brickNodes = field.children;
-                                    this.gameParams.fieldNode = field;
+                        <div className="field-wrap">
+
+
+                            <div
+                                ref={(field) => {
+                                    if (field) {
+                                        this.gameParams.brickNodes = field.children;
+                                        this.gameParams.fieldNode = field;
+                                    }
+                                }}
+                                key={this.state.resetKey}
+                                id="field"
+                                style={fieldStyle}
+                            >
+
+                                /*--------------------------------------------------------
+                                    bricks
+                                ----------------------------------------------------------*/
+                                {bricks.map((row, i) => {
+                                    return row.map((col, k) => {
+                                        return (
+                                            <div
+                                                style={brickStyle}
+                                                key={i+k}
+                                                brickrow={`${i}`}
+                                                brickcol={`${k}`}
+                                                className={`${col === 0 ? 'cell': 'brick'}`}
+                                            />
+                                        );
+                                    });
+
+                                })
+
                                 }
-                            }}
-                            key={this.state.resetKey}
-                            id="field"
-                            style={fieldStyle}
-                        >
-
-                            /*--------------------------------------------------------
-                                bricks
-                            ----------------------------------------------------------*/
-                            {bricks.map((row, i) => {
-                                return row.map((col, k) => {
-                                    return (
+                                /*--------------------------------------------------------
+                                    balls
+                                ----------------------------------------------------------*/
+                                {!this.state.winning && this.state.ballsArr.map((b, i) => {
+                                    return(
                                         <div
-                                            style={brickStyle}
-                                            key={i+k}
-                                            brickrow={`${i}`}
-                                            brickcol={`${k}`}
-                                            className={`${col === 0 ? 'cell': 'brick'}`}
+                                            key={`key${i+1}`}
+                                            ref={(ball) => {this.gameParams.ballNodes[i] = ball}}
+                                            ballkey={i}
+                                            style={ballStyle}
+                                            id="ball"
                                         />
                                     );
-                                });
+                                })
 
-                            })
+                                }
 
-                            }
-                            /*--------------------------------------------------------
-                                balls
-                            ----------------------------------------------------------*/
-                            {!this.state.winning && this.state.ballsArr.map((b, i) => {
-                                return(
-                                    <div
-                                        key={`key${i+1}`}
-                                        ref={(ball) => {this.gameParams.ballNodes[i] = ball}}
-                                        ballkey={i}
-                                        style={ballStyle}
-                                        id="ball"
-                                    />
-                                );
-                            })
+                                <div ref={(paddle) => {this.gameParams.paddleNode = paddle}} style={paddleStyle} id="paddle" />
 
-                            }
-
-                            <div ref={(paddle) => {this.gameParams.paddleNode = paddle}} style={paddleStyle} id="paddle" />
-
-                            {this.state.winning &&
+                                {this.state.winning &&
                                 <Fragment>
                                     <video ref={this.playWinningVideo} className="win-video">
                                         <source src="media/lazy_dance.mp4" type="video/mp4" />
                                     </video>
                                 </Fragment>
-                            }
+                                }
+                            </div>
                         </div>
-                    </div>
+                    </Fragment>
                 }
                 <audio
                     ref={(elem) => {this.audioNode = elem}}
