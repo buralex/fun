@@ -528,7 +528,6 @@ export default class Game extends PureComponent {
         * -------------------------------------------------------------------*/
     }
 
-
     draw = ({ width, height, brickNodes, balls, ballNodes, paddle, dt }) => {
 
         const frame = (time) => {
