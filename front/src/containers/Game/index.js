@@ -73,6 +73,11 @@ export default class Game extends PureComponent {
             ballNodes: [],
         }
 
+        this.brickParams = {
+            width: fieldHeight / bricks[0].length,
+            height: fieldHeight / bricks[0].length,
+        };
+
         this.ballParams = {
             x: 0,
             y: 0,
@@ -111,9 +116,142 @@ export default class Game extends PureComponent {
         }
 
         if (this.canvas) {
-            this.ctx =this.canvas.getContext("2d");
+            this.ctx = this.canvas.getContext("2d");
             console.log(this.ctx);
+            // this.drawBricks();
+            // this.drawPaddle();
+            // this.drawBall();
         }
+    }
+
+    drawBall = () => {
+        const { ctx, canvas } = this;
+        const { balls } = this.gameParams;
+
+        balls.forEach((ball, i) => {
+            //this.calcMovementAndCollisions(width, height, brickNodes, ball, ballNodes, paddle, dt);
+
+
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, this.ballParams.radius, 0, Math.PI*2);
+            ctx.fillStyle = "#0095DD";
+            ctx.fill();
+            ctx.closePath();
+        });
+
+
+    }
+
+    drawPaddle = () => {
+        const { ctx, canvas } = this;
+        const { x, height, width } = this.gameParams.paddle;
+
+        //console.log(canvas.height);
+        ctx.beginPath();
+        ctx.rect(x, canvas.height - height, width, height);
+        ctx.fillStyle = "#0095DD";
+        ctx.fill();
+        ctx.closePath();
+    }
+
+    drawBricks = () => {
+        const { ctx } = this;
+        const { height, width } = this.brickParams;
+        const brickColumnCount = bricks[0].length;
+        const brickRowCount = bricks.length;
+
+        // console.log(brickColumnCount);
+        // console.log(brickRowCount);
+
+        //var brickPadding = 10;
+        //var brickOffsetTop = 30;
+        //var brickOffsetLeft = 30;
+
+        bricks.forEach((row, i) => {
+            row.forEach((col, k) => {
+                if(bricks[i][k] === 1) {
+                    var brickX = (k*(width));
+                    var brickY = (i*(height));
+                    //bricks[c][r].x = brickX;
+                    //bricks[c][r].y = brickY;
+
+
+                    ctx.beginPath();
+                    // console.log(brickHeight);
+                    // console.log(brickWidth);
+                    ctx.rect(brickX, brickY, width, height);
+                    ctx.fillStyle = "green";
+                    //ctx.stroke();
+                    ctx.fill();
+                    ctx.closePath();
+                    if (i == 35) {
+                        //debugger
+                    }
+
+                }
+            });
+
+        })
+
+        // for(let c=0; c < brickColumnCount; c++) {
+        //     for(let r=0; r < brickRowCount; r++) {
+        //         console.log(c);
+        //         console.log(r);
+        //         console.log(bricks[c]);
+        //         console.log(bricks[c][r]);
+        //         if(/*bricks[c][r] === 1*/ 1) {
+        //             var brickX = (r*(brickWidth+brickPadding))+brickOffsetLeft;
+        //             var brickY = (c*(brickHeight+brickPadding))+brickOffsetTop;
+        //             //bricks[c][r].x = brickX;
+        //             //bricks[c][r].y = brickY;
+        //
+        //
+        //             ctx.beginPath();
+        //             console.log(brickHeight);
+        //             console.log(brickWidth);
+        //             ctx.rect(brickX, brickY, brickWidth, brickHeight);
+        //             ctx.fillStyle = "green";
+        //             ctx.stroke();
+        //             ctx.fill();
+        //             ctx.closePath();
+        //             if (r == 35) {
+        //                 debugger
+        //             }
+        //
+        //         }
+        //     }
+        // }
+
+        // bricks.map((row, i) => {
+        //     return row.forEach((col, k) => {
+        //         return (
+        //             <div
+        //                 style={brickStyle}
+        //                 key={i+k}
+        //                 brickrow={`${i}`}
+        //                 brickcol={`${k}`}
+        //                 className={`${col === 0 ? 'cell': 'brick'}`}
+        //             />
+        //         );
+        //     });
+        //
+        // })
+
+        // for(c=0; c<brickColumnCount; c++) {
+        //     for(r=0; r<brickRowCount; r++) {
+        //         if(bricks[c][r].status == 1) {
+        //             var brickX = (r*(brickWidth+brickPadding))+brickOffsetLeft;
+        //             var brickY = (c*(brickHeight+brickPadding))+brickOffsetTop;
+        //             bricks[c][r].x = brickX;
+        //             bricks[c][r].y = brickY;
+        //             ctx.beginPath();
+        //             ctx.rect(brickX, brickY, brickWidth, brickHeight);
+        //             ctx.fillStyle = "#0095DD";
+        //             ctx.fill();
+        //             ctx.closePath();
+        //         }
+        //     }
+        // }
     }
 
     // Return a random number in between x and y
@@ -143,8 +281,8 @@ export default class Game extends PureComponent {
         paddle.x = width / 2 - (paddle.width / 2);
         paddle.y = height - paddle.height - paddingBottom;
 
-        paddleNode.style.left = `${paddle.x}px`;
-        paddleNode.style.top = `${paddle.y}px`;
+        //paddleNode.style.left = `${paddle.x}px`;
+        //paddleNode.style.top = `${paddle.y}px`;
 
         if (balls.length !== this.state.ballsArr.length) {
             balls.length = 0;
@@ -178,7 +316,7 @@ export default class Game extends PureComponent {
                 paddle.x = pageX - fieldLeftBound;
             }
 
-            paddleNode.style.left = `${paddle.x}px`;
+            //paddleNode.style.left = `${paddle.x}px`;
         }, false);
     }
 
@@ -318,8 +456,8 @@ export default class Game extends PureComponent {
         /*------------------------------------------------
             check for collisions with the paddle
         --------------------------------------------------*/
-        const brickWidth = brickNodes[0].offsetWidth;
-        const brickHeight = brickNodes[0].offsetHeight;
+        const brickWidth = this.brickParams.width;
+        const brickHeight = this.brickParams.height;
 
         let correctionDims = ball.radius;
 
@@ -397,6 +535,11 @@ export default class Game extends PureComponent {
             /*---------------------------------------------------------------------
                     ball movement
             * -------------------------------------------------------------------*/
+
+            this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            this.drawBricks();
+            this.drawPaddle();
+            this.drawBall();
 
 
             balls.forEach((ball, i) => {
@@ -552,9 +695,9 @@ export default class Game extends PureComponent {
         };
 
         const canvasStyle = {
-            width: width,
-            height: height,
-            background: 'gray',
+            //width: width,
+            //height: height,
+            background: 'white',
             zIndex: '10'
         };
 
@@ -650,6 +793,8 @@ export default class Game extends PureComponent {
                 {this.state.showField &&
                     <Fragment>
                         <canvas
+                            width={width}
+                            height={height}
                             style={canvasStyle}
                             ref={(c) => {this.canvas = c}}
                             id="fieldCanvas"
@@ -673,40 +818,42 @@ export default class Game extends PureComponent {
                                 /*--------------------------------------------------------
                                     bricks
                                 ----------------------------------------------------------*/
-                                {bricks.map((row, i) => {
-                                    return row.map((col, k) => {
-                                        return (
-                                            <div
-                                                style={brickStyle}
-                                                key={i+k}
-                                                brickrow={`${i}`}
-                                                brickcol={`${k}`}
-                                                className={`${col === 0 ? 'cell': 'brick'}`}
-                                            />
-                                        );
-                                    });
-
-                                })
+                                {
+                                //     bricks.map((row, i) => {
+                                //     return row.map((col, k) => {
+                                //         return (
+                                //             <div
+                                //                 style={brickStyle}
+                                //                 key={i+k}
+                                //                 brickrow={`${i}`}
+                                //                 brickcol={`${k}`}
+                                //                 className={`${col === 0 ? 'cell': 'brick'}`}
+                                //             />
+                                //         );
+                                //     });
+                                //
+                                // })
 
                                 }
                                 /*--------------------------------------------------------
                                     balls
                                 ----------------------------------------------------------*/
-                                {!this.state.winning && this.state.ballsArr.map((b, i) => {
-                                    return(
-                                        <div
-                                            key={`key${i+1}`}
-                                            ref={(ball) => {this.gameParams.ballNodes[i] = ball}}
-                                            ballkey={i}
-                                            style={ballStyle}
-                                            id="ball"
-                                        />
-                                    );
-                                })
+                                {
+                                //     !this.state.winning && this.state.ballsArr.map((b, i) => {
+                                //     return(
+                                //         <div
+                                //             key={`key${i+1}`}
+                                //             ref={(ball) => {this.gameParams.ballNodes[i] = ball}}
+                                //             ballkey={i}
+                                //             style={ballStyle}
+                                //             id="ball"
+                                //         />
+                                //     );
+                                // })
 
                                 }
 
-                                <div ref={(paddle) => {this.gameParams.paddleNode = paddle}} style={paddleStyle} id="paddle" />
+                                {/*<div ref={(paddle) => {this.gameParams.paddleNode = paddle}} style={paddleStyle} id="paddle" />*/}
 
                                 {this.state.winning &&
                                 <Fragment>
