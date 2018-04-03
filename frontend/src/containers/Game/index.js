@@ -2,6 +2,7 @@ import React, { PureComponent, Fragment } from 'react';
 
 
 import debounce from "lodash/debounce";
+import flatten from 'lodash/flatten';
 
 import './style.css';
 
@@ -9,6 +10,12 @@ import bricks from './bricks';
 import {playList} from '../../utils/data/playList';
 
 //import bricks from './b1';
+
+const flattenBricks = flatten(bricks);
+
+// console.log(flattenBricks);
+//
+// debugger
 
 
 // calc game height depending on screen height
@@ -490,14 +497,31 @@ export default class Game extends PureComponent {
         // on which col the ball is located (begining from 0)
         const col = Math.ceil((parseInt(ball.x) + ball.radius) / brickWidth) - 1;
 
-        let cell = brickNodes[row * (width / brickWidth) + col];
+        //let cell = brickNodes[row * (width / brickWidth) + col];
+        let cell = flattenBricks[row * (width / brickWidth) + col];
+        // console.log(row);
+        // console.log(col);
 
-        if (cell && cell.classList.contains('brick') && !cell.classList.contains('removed')) {
+        if (row === 1) {
 
+
+            //debugger
+        }
+        //console.log(row * (width / brickWidth) + col);
+        console.log(cell);
+
+        //if (cell && cell.classList.contains('brick') && !cell.classList.contains('removed')) {
+        if (cell && cell === 1) {
+            console.log('REMOVED', cell);
             this.brokenBricks += 1;
 
-            cell.classList.add('removed');
+            // remove brick
+            bricks[row][col] = 0;
+            flattenBricks[row * (width / brickWidth) + col] = 0;
 
+            //cell.classList.add('removed');
+
+            // calc which part of brick is hit
             const cellPart = this.getRectPart(
                 cell,
                 ball.x + ball.radius,
