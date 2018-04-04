@@ -36,8 +36,8 @@ export default class Game extends PureComponent {
         super(props);
 
         this.state = {
-            // each ball it's another '1'
-            ballsArr: [1],
+            // each ball it's another array element '1'
+            ballsArr: [1, 1],
             ballSpeed: 300,
             resetKey: 0,
             showField: false,
@@ -174,15 +174,15 @@ export default class Game extends PureComponent {
         //var brickOffsetTop = 30;
         //var brickOffsetLeft = 30;
 
-        bricks.forEach((row, i) => {
-            row.forEach((col, k) => {
+        for (let i = 0; i < bricks.length; i++) {
+            for (let k = 0; k < bricks[i].length; k++) {
                 if(bricks[i][k] === 1) {
                     var brickX = (k*(width));
                     var brickY = (i*(height));
                     //bricks[c][r].x = brickX;
                     //bricks[c][r].y = brickY;
 
-
+                    //console.log('bkickjflksjdlkf');
                     ctx.beginPath();
                     // console.log(brickHeight);
                     // console.log(brickWidth);
@@ -196,9 +196,9 @@ export default class Game extends PureComponent {
                     }
 
                 }
-            });
+            }
+        }
 
-        })
 
         // for(let c=0; c < brickColumnCount; c++) {
         //     for(let r=0; r < brickRowCount; r++) {
@@ -406,22 +406,15 @@ export default class Game extends PureComponent {
         return d;
     };
 
-    getRectPart = (elem, x, y, last_x, last_y) => {
-        let w = elem.offsetWidth;
-        let h = elem.offsetHeight;
+    getRectPart = (row, col, w, h, x, y, last_x, last_y) => {
 
         // coords of ball relatively to brick middle
-        let coordX = (x - elem.offsetLeft - (w / 2) );
-        let coordY = (y - elem.offsetTop - (h / 2) );
+        let coordX = (x - ((row) * w ) - (w / 2) );
+        let coordY = (y - ((col) * h ) - (h / 2) );
 
-        let coordLastX = (last_x - elem.offsetLeft - (w / 2) );
-        let coordLastY = (last_y - elem.offsetTop - (h / 2) );
+        const diffY = (y - last_y);
+        const diffX = (x - last_x);
 
-        const coef = 5; // 5px
-        const diffY = (y - last_y) + coef;
-        const diffX = (x - last_x) + coef;
-
-        //return this.calcRectPart(w, h, coordX, coordY);
         return this.calcRectPart(w + (2 * diffX), h + (2 * diffY), coordX, coordY);
     }
 
@@ -490,27 +483,14 @@ export default class Game extends PureComponent {
             this.isBallReflectingFromPaddle = false;
         }
 
-
         // on which row the ball is located (begining from 0)
         const row = Math.ceil((parseInt(ball.y) + ball.radius) / brickHeight) - 1;
 
         // on which col the ball is located (begining from 0)
         const col = Math.ceil((parseInt(ball.x) + ball.radius) / brickWidth) - 1;
 
-        //let cell = brickNodes[row * (width / brickWidth) + col];
         let cell = flattenBricks[row * (width / brickWidth) + col];
-        // console.log(row);
-        // console.log(col);
 
-        if (row === 1) {
-
-
-            //debugger
-        }
-        //console.log(row * (width / brickWidth) + col);
-        console.log(cell);
-
-        //if (cell && cell.classList.contains('brick') && !cell.classList.contains('removed')) {
         if (cell && cell === 1) {
             console.log('REMOVED', cell);
             this.brokenBricks += 1;
@@ -523,7 +503,10 @@ export default class Game extends PureComponent {
 
             // calc which part of brick is hit
             const cellPart = this.getRectPart(
-                cell,
+                row,
+                col,
+                brickWidth,
+                brickHeight,
                 ball.x + ball.radius,
                 ball.y + ball.radius,
                 ball.last_x + ball.radius,
