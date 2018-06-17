@@ -33,18 +33,16 @@ class App extends Component {
 
     componentDidMount () {
         window.addEventListener("resize", debounce(this.resizeHandler, 1000));
+    }
 
-        document.addEventListener('keydown', (e) => {
+    startGame = () => {
+        if (!this.gameStarted) {
+            this.gameStarted = true;
 
-            if (!this.gameStarted) {
-                this.gameStarted = true;
-
-                this.setState(prevState => ({
-                    showGame: true,
-                }))
-            }
-
-        }, false);
+            this.setState(prevState => ({
+                showGame: true,
+            }))
+        }
     }
 
     resizeHandler = () => {
@@ -71,9 +69,9 @@ class App extends Component {
             <div className="App">
                 <div className="wrapper">
                     {!this.state.showGame &&
-                        <div ref={(g) => {this.greeting = g}} className="greeting">
-                            Press any key to play
-                        </div>
+                        <button className="button-start" onClick={this.startGame}>
+                            start
+                        </button>
                     }
                     {this.state.showGame &&
                         <Game
