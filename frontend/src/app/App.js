@@ -36,15 +36,12 @@ class App extends Component {
 
         document.addEventListener('keydown', (e) => {
 
-            if (e.keyCode === 32) {
+            if (!this.gameStarted) {
+                this.gameStarted = true;
 
-                if (!this.gameStarted) {
-                    this.gameStarted = true;
-
-                    this.setState(prevState => ({
-                        showGame: true,
-                    }))
-                }
+                this.setState(prevState => ({
+                    showGame: true,
+                }))
             }
 
         }, false);
@@ -75,7 +72,7 @@ class App extends Component {
                 <div className="wrapper">
                     {!this.state.showGame &&
                         <div ref={(g) => {this.greeting = g}} className="greeting">
-                            Press "space" to play
+                            Press any key to play
                         </div>
                     }
                     {this.state.showGame &&
