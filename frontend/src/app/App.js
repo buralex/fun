@@ -45,6 +45,7 @@ class App extends Component {
         }
     }
 
+
     resizeHandler = () => {
 
         this.setState(prevState => ({
